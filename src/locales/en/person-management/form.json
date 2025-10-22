@@ -1,0 +1,149 @@
+{
+  "form": {
+    "title": "Registration Form",
+    "sections": {
+      "personal": "Personal Information",
+      "contact": "Contact Information",
+      "additional": "Additional Information"
+    },
+    "fields": {
+      "title": {
+        "label": "Title",
+        "placeholder": "Select title",
+        "options": {
+          "นาย": "Mr.",
+          "นาง": "Mrs.",
+          "นางสาว": "Miss"
+        }
+      },
+      "firstname": {
+        "label": "Firstname",
+        "placeholder": "Enter firstname"
+      },
+      "lastname": {
+        "label": "Lastname",
+        "placeholder": "Enter lastname"
+      },
+      "birthday": {
+        "label": "Birthday",
+        "placeholder": "Select birthday"
+      },
+      "nationality": {
+        "label": "Nationality",
+        "placeholder": "Select nationality",
+        "options": {
+          "thai": "Thai",
+          "other": "Other"
+        }
+      },
+      "citizenId": {
+        "label": "Citizen ID",
+        "placeholders": {
+          "part1": "1",
+          "part2": "4",
+          "part3": "5",
+          "part4": "2",
+          "part5": "1"
+        }
+      },
+      "gender": {
+        "label": "Gender",
+        "options": {
+          "male": "Male",
+          "female": "Female",
+          "unsex": "Unsex"
+        }
+      },
+      "countryCode": {
+        "label": "Country Code",
+        "placeholder": "+66",
+        "options": {
+          "+66": "+66 (Thailand)",
+          "+1": "+1 (USA)",
+          "+44": "+44 (UK)"
+        }
+      },
+      "mobilePhone": {
+        "label": "Mobile Phone",
+        "placeholder": "Enter mobile phone number"
+      },
+      "passportNo": {
+        "label": "Passport No",
+        "placeholder": "Enter passport number"
+      },
+      "expectedSalary": {
+        "label": "Expected Salary",
+        "placeholder": "Enter expected salary"
+      }
+    },
+    "buttons": {
+      "submit": "Submit",
+      "reset": "Reset"
+    },
+    "validation": {
+      "required": {
+        "title": "Please select title!",
+        "firstname": "Please input firstname!",
+        "lastname": "Please input lastname!",
+        "birthday": "Please select birthday!",
+        "nationality": "Please select nationality!",
+        "gender": "Please select gender!",
+        "countryCode": "Please select country code!",
+        "mobilePhone": "Please input mobile phone!",
+        "expectedSalary": "Please input expected salary!"
+      },
+      "format": {
+        "firstname": {
+          "min": "Firstname must be at least 2 characters!",
+          "pattern": "Firstname must contain only letters!"
+        },
+        "lastname": {
+          "min": "Lastname must be at least 2 characters!",
+          "pattern": "Lastname must contain only letters!"
+        },
+        "citizenId": {
+          "part1": "Must be 1 digit!",
+          "part2": "Must be 4 digits!",
+          "part3": "Must be 5 digits!",
+          "part4": "Must be 2 digits!",
+          "part5": "Must be 1 digit!"
+        },
+        "mobilePhone": "Please enter valid phone number!",
+        "passportNo": "Please enter valid passport number!",
+        "expectedSalary": "Salary must be positive!"
+      }
+    },
+    "messages": {
+      "submitSuccess": "Form submitted successfully!",
+      "resetInfo": "Form has been reset",
+      "registrationSuccess": "Registration completed successfully!"
+    }
+  },
+  "table": {
+    "columns": {
+      "title": "Title",
+      "name": "Name",
+      "gender": "Gender",
+      "phone": "Phone",
+      "nationality": "Nationality",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Are you sure you want to delete this person?",
+        "content": "This action cannot be undone.",
+        "okText": "Delete",
+        "cancelText": "Cancel"
+      }
+    },
+    "messages": {
+      "deleteSuccess": "Person deleted successfully",
+      "updateSuccess": "Person updated successfully",
+      "addSuccess": "Person added successfully"
+    }
+  }
+}

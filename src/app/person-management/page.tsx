@@ -1,38 +1,109 @@
 "use client";
 
-import { Button, Card, Form, Input, Modal, Space, Table, message } from "antd";
-import { useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Table,
+  App,
+  Row,
+  Col,
+  Select,
+  DatePicker,
+  Radio,
+  InputNumber,
+} from "antd";
+import dayjs from "dayjs";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-
-interface Person {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  age: number;
-}
+import { useTranslation as useReactTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import type {
+  Person,
+  RegistrationFormValues,
+  FormSubmitHandler,
+  TitleOption,
+  NationalityOption,
+  CountryCodeOption,
+} from "@/types/person.types";
+import { createValidationRules } from "@/types/person.types";
+import {
+  addPerson,
+  deletePerson,
+  updatePerson,
+  setPersons,
+} from "@/store/personSlice";
+import { useAppSelector, useAppDispatch } from "@/store/store";
 
 const PersonManagement = () => {
   const { t } = useTranslation();
-  const [persons, setPersons] = useState<Person[]>([]);
+  const { message } = App.useApp();
+  const persons = useAppSelector((state) => state.persons) as Person[];
+  const dispatch = useAppDispatch();
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
-  const [form] = Form.useForm();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
 
+  // Dynamic validation rules with i18n - recreate on language change
+  const validationRules = useMemo(() => createValidationRules(t), [t]);
+
+  // Form handlers with type safety
+  const handleFormSubmit: FormSubmitHandler = (
+    values: RegistrationFormValues,
+  ) => {
+    console.log("Form submitted with type safety:", values);
+
+    // Create person object from form values
+    const newPerson: Person = {
+      id: Date.now().toString(),
+      title: values.title,
+      name: `${values.title} ${values.firstname} ${values.lastname}`,
+      gender: values.gender,
+      phone: `${values.countryCode}${values.mobilePhone}`,
+      nationality: values.nationality,
+      firstname: values.firstname,
+      lastname: values.lastname,
+      birthday: values.birthday ? values.birthday.toISOString() : "",
+      citizenId1: values.citizenId1,
+      citizenId2: values.citizenId2,
+      citizenId3: values.citizenId3,
+      citizenId4: values.citizenId4,
+      citizenId5: values.citizenId5,
+      countryCode: values.countryCode,
+      mobilePhone: values.mobilePhone,
+      passportNo: values.passportNo,
+      expectedSalary: values.expectedSalary,
+    };
+
+    // Add to persons list via Redux
+    dispatch(addPerson(newPerson));
+    localStorage.setItem("persons", JSON.stringify([...persons, newPerson]));
+
+    message.success(t("person-management:form.messages.registrationSuccess"));
+  };
+
+  const handleFormReset = () => {
+    message.info(t("person-management:form.messages.resetInfo"));
+  };
+
   // Load data from localStorage on mount
   useEffect(() => {
     const savedPersons = localStorage.getItem("persons");
     if (savedPersons) {
-      setPersons(JSON.parse(savedPersons));
+      const parsedPersons = JSON.parse(savedPersons) as Person[];
+      dispatch(setPersons(parsedPersons));
     }
-  }, []);
+  }, [dispatch]);
 
   // Save to localStorage whenever persons change
   useEffect(() => {
@@ -41,112 +112,159 @@ const PersonManagement = () => {
     }
   }, [persons]);
 
-  const handleAdd = () => {
-    setEditingPerson(null);
-    form.resetFields();
+  const handleEdit = (person: Person) => {
+    setEditingPerson(person);
+    form.setFieldsValue({
+      title: person.title,
+      firstname: person.firstname,
+      lastname: person.lastname,
+      birthday: person.birthday ? dayjs(person.birthday) : null,
+      nationality: person.nationality,
+      citizenId1: person.citizenId1,
+      citizenId2: person.citizenId2,
+      citizenId3: person.citizenId3,
+      citizenId4: person.citizenId4,
+      citizenId5: person.citizenId5,
+      gender: person.gender,
+      countryCode: person.countryCode,
+      mobilePhone: person.mobilePhone,
+      passportNo: person.passportNo,
+      expectedSalary: person.expectedSalary,
+    });
     setIsModalOpen(true);
   };
 
-  const handleEdit = (person: Person) => {
-    setEditingPerson(person);
-    form.setFieldsValue(person);
-    setIsModalOpen(true);
+  const handleUpdate = (values: RegistrationFormValues) => {
+    if (!editingPerson) return;
+
+    const updatedPerson: Person = {
+      ...editingPerson,
+      title: values.title,
+      name: `${values.title} ${values.firstname} ${values.lastname}`,
+      gender: values.gender,
+      phone: `${values.countryCode}${values.mobilePhone}`,
+      nationality: values.nationality,
+      firstname: values.firstname,
+      lastname: values.lastname,
+      birthday: values.birthday ? values.birthday.toISOString() : "",
+      citizenId1: values.citizenId1,
+      citizenId2: values.citizenId2,
+      citizenId3: values.citizenId3,
+      citizenId4: values.citizenId4,
+      citizenId5: values.citizenId5,
+      countryCode: values.countryCode,
+      mobilePhone: values.mobilePhone,
+      passportNo: values.passportNo,
+      expectedSalary: values.expectedSalary,
+    };
+
+    dispatch(updatePerson(updatedPerson));
+    setIsModalOpen(false);
+    setEditingPerson(null);
+    form.resetFields();
+    message.success(t("person-management:form.messages.updateSuccess"));
   };
 
   const handleDelete = (id: string) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this person?",
-      content: "This action cannot be undone.",
-      okText: "Delete",
+      title: t("person-management:table.confirm.delete.title"),
+      content: t("person-management:table.confirm.delete.content"),
+      okText: t("person-management:table.confirm.delete.okText"),
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: t("person-management:table.confirm.delete.cancelText"),
       onOk: () => {
-        const updatedPersons = persons.filter((p) => p.id !== id);
-        setPersons(updatedPersons);
-        localStorage.setItem("persons", JSON.stringify(updatedPersons));
-        message.success("Person deleted successfully");
+        dispatch(deletePerson(id));
+        message.success(t("person-management:table.messages.deleteSuccess"));
       },
     });
   };
 
-  const handleModalOk = async () => {
-    try {
-      setLoading(true);
-      const values = await form.validateFields();
-
-      if (editingPerson) {
-        // Update existing person
-        const updatedPersons = persons.map((p) =>
-          p.id === editingPerson.id ? { ...p, ...values } : p,
-        );
-        setPersons(updatedPersons);
-        localStorage.setItem("persons", JSON.stringify(updatedPersons));
-        message.success("Person updated successfully");
-      } else {
-        // Add new person
-        const newPerson: Person = {
-          id: Date.now().toString(),
-          ...values,
-        };
-        const updatedPersons = [...persons, newPerson];
-        setPersons(updatedPersons);
-        localStorage.setItem("persons", JSON.stringify(updatedPersons));
-        message.success("Person added successfully");
-      }
-
-      setIsModalOpen(false);
-      form.resetFields();
-    } catch (error) {
-      console.error("Validation failed:", error);
-    } finally {
-      setLoading(false);
+  const handleDeleteSelected = () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning("กรุณาเลือกรายการที่ต้องการลบ");
+      return;
     }
+
+    Modal.confirm({
+      title: `ลบรายการที่เลือก (${selectedRowKeys.length} รายการ)`,
+      content: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการที่เลือกทั้งหมด?",
+      okText: "ลบทั้งหมด",
+      okType: "danger",
+      cancelText: "ยกเลิก",
+      onOk: () => {
+        selectedRowKeys.forEach((id) => {
+          dispatch(deletePerson(id));
+        });
+        setSelectedRowKeys([]);
+        message.success(
+          `ลบรายการที่เลือก ${selectedRowKeys.length} รายการเรียบร้อย`,
+        );
+      },
+    });
   };
 
-  const handleModalCancel = () => {
-    setIsModalOpen(false);
-    form.resetFields();
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    setSelectedRowKeys(newSelectedRowKeys as string[]);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
   };
 
   const columns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      sorter: (a: Person, b: Person) => a.name.localeCompare(b.name),
+      title: t("person-management:table.columns.title"),
+      dataIndex: "title",
+      key: "title",
+      width: 80,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      title: "เพศ",
+      dataIndex: "gender",
+      key: "gender",
+      width: 100,
+      render: (gender: string) => (
+        <span style={{ textTransform: "capitalize" }}>
+          {gender === "male"
+            ? t("person-management:form.fields.gender.options.male")
+            : gender === "female"
+              ? t("person-management:form.fields.gender.options.female")
+              : t("person-management:form.fields.gender.options.unsex")}
+        </span>
+      ),
     },
     {
-      title: "Phone",
+      title: "หมายเลขโทรศัพท์มือถือ",
       dataIndex: "phone",
       key: "phone",
+      width: 150,
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "สัญชาติ",
+      dataIndex: "nationality",
+      key: "nationality",
+      width: 120,
+      render: (nationality: string) => (
+        <span style={{ textTransform: "capitalize" }}>
+          {nationality === "thai"
+            ? t("person-management:form.fields.nationality.options.thai")
+            : nationality}
+        </span>
+      ),
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-      sorter: (a: Person, b: Person) => a.age - b.age,
-    },
-    {
-      title: "Actions",
+      title: "จัดการ",
       key: "actions",
+      width: 150,
       render: (_: any, record: Person) => (
-        <Space>
+        <Space key={`actions-${record.id}`}>
           <Button
             type="primary"
             size="small"
             onClick={() => handleEdit(record)}
           >
-            Edit
+            {t("person-management:table.actions.edit")}
           </Button>
           <Button
             type="primary"
@@ -154,7 +272,7 @@ const PersonManagement = () => {
             size="small"
             onClick={() => handleDelete(record.id)}
           >
-            Delete
+            {t("person-management:table.actions.delete")}
           </Button>
         </Space>
       ),
@@ -169,27 +287,332 @@ const PersonManagement = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "24px",
-          }}
-        >
-          <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-            ยังคิดชื่อไม่ออก - Person Management
+        {/* section 1 */}
+        <div style={{ marginBottom: "24px" }}>
+          <h1
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              margin: "0 0 24px 0",
+            }}
+          >
+            {t("person-management:form.title")}
           </h1>
-          <Button type="primary" onClick={handleAdd}>
-            Add Person
-          </Button>
+
+          <Form<RegistrationFormValues>
+            id="register"
+            layout="vertical"
+            initialValues={{
+              expectedSalary: 0,
+            }}
+            onFinish={handleFormSubmit}
+            onReset={handleFormReset}
+          >
+            {/* Row 1: Title, Firstname, Lastname */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={8}>
+                <Form.Item<RegistrationFormValues>
+                  name="title"
+                  label={t("person-management:form.fields.title.label")}
+                  rules={validationRules.title}
+                >
+                  <Select<TitleOption["value"]>
+                    placeholder={t(
+                      "person-management:form.fields.title.placeholder",
+                    )}
+                  >
+                    <Select.Option value="นาย">
+                      {t("person-management:form.fields.title.options.นาย")}
+                    </Select.Option>
+                    <Select.Option value="นาง">
+                      {t("person-management:form.fields.title.options.นาง")}
+                    </Select.Option>
+                    <Select.Option value="นางสาว">
+                      {t("person-management:form.fields.title.options.นางสาว")}
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item<RegistrationFormValues>
+                  name="firstname"
+                  label={t("person-management:form.fields.firstname.label")}
+                  rules={validationRules.firstname}
+                >
+                  <Input
+                    placeholder={t(
+                      "person-management:form.fields.firstname.placeholder",
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item<RegistrationFormValues>
+                  name="lastname"
+                  label={t("person-management:form.fields.lastname.label")}
+                  rules={validationRules.lastname}
+                >
+                  <Input
+                    placeholder={t(
+                      "person-management:form.fields.lastname.placeholder",
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 2: Birthday, Nationality */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={12}>
+                <Form.Item<RegistrationFormValues>
+                  name="birthday"
+                  label={t("person-management:form.fields.birthday.label")}
+                  rules={validationRules.birthday}
+                >
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    placeholder={t(
+                      "person-management:form.fields.birthday.placeholder",
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item<RegistrationFormValues>
+                  name="nationality"
+                  label={t("person-management:form.fields.nationality.label")}
+                  rules={validationRules.nationality}
+                >
+                  <Select<NationalityOption["value"]>
+                    placeholder={t(
+                      "person-management:form.fields.nationality.placeholder",
+                    )}
+                  >
+                    <Select.Option value="thai">
+                      {t(
+                        "person-management:form.fields.nationality.options.thai",
+                      )}
+                    </Select.Option>
+                    <Select.Option value="other">
+                      {t(
+                        "person-management:form.fields.nationality.options.other",
+                      )}
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 3: Citizen ID */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24}>
+                <Form.Item
+                  label={t("person-management:form.fields.citizenId.label")}
+                  required
+                >
+                  <Space.Compact>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId1"
+                      noStyle
+                      rules={validationRules.citizenId1}
+                    >
+                      <Input
+                        style={{ width: "50px", textAlign: "center" }}
+                        maxLength={1}
+                      />
+                    </Form.Item>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId2"
+                      noStyle
+                      rules={validationRules.citizenId2}
+                    >
+                      <Input
+                        style={{ width: "150px", textAlign: "center" }}
+                        maxLength={4}
+                      />
+                    </Form.Item>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId3"
+                      noStyle
+                      rules={validationRules.citizenId3}
+                    >
+                      <Input
+                        style={{ width: "180px", textAlign: "center" }}
+                        maxLength={5}
+                      />
+                    </Form.Item>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId4"
+                      noStyle
+                      rules={validationRules.citizenId4}
+                    >
+                      <Input
+                        style={{ width: "80px", textAlign: "center" }}
+                        maxLength={2}
+                      />
+                    </Form.Item>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId5"
+                      noStyle
+                      rules={validationRules.citizenId5}
+                    >
+                      <Input
+                        style={{ width: "50px", textAlign: "center" }}
+                        maxLength={1}
+                      />
+                    </Form.Item>
+                  </Space.Compact>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 4: Gender */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24}>
+                <Form.Item<RegistrationFormValues>
+                  name="gender"
+                  label={t("person-management:form.fields.gender.label")}
+                  rules={validationRules.gender}
+                >
+                  <Radio.Group>
+                    <Radio value="male">
+                      {t("person-management:form.fields.gender.options.male")}
+                    </Radio>
+                    <Radio value="female">
+                      {t("person-management:form.fields.gender.options.female")}
+                    </Radio>
+                    <Radio value="unsex">
+                      {t("person-management:form.fields.gender.options.unsex")}
+                    </Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 5: Mobile Phone */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={6}>
+                <Form.Item<RegistrationFormValues>
+                  name="countryCode"
+                  label={t("person-management:form.fields.countryCode.label")}
+                  rules={validationRules.countryCode}
+                >
+                  <Select<CountryCodeOption["value"]>
+                    placeholder={t(
+                      "person-management:form.fields.countryCode.placeholder",
+                    )}
+                  >
+                    <Select.Option value="+66">
+                      {t(
+                        "person-management:form.fields.countryCode.options.+66",
+                      )}
+                    </Select.Option>
+                    <Select.Option value="+1">
+                      {t(
+                        "person-management:form.fields.countryCode.options.+1",
+                      )}
+                    </Select.Option>
+                    <Select.Option value="+44">
+                      {t(
+                        "person-management:form.fields.countryCode.options.+44",
+                      )}
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={18}>
+                <Form.Item<RegistrationFormValues>
+                  name="mobilePhone"
+                  label={t("person-management:form.fields.mobilePhone.label")}
+                  rules={validationRules.mobilePhone}
+                >
+                  <Input
+                    placeholder={t(
+                      "person-management:form.fields.mobilePhone.placeholder",
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 6: Passport No */}
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24}>
+                <Form.Item<RegistrationFormValues>
+                  name="passportNo"
+                  label={t("person-management:form.fields.passportNo.label")}
+                  rules={validationRules.passportNo}
+                >
+                  <Input
+                    placeholder={t(
+                      "person-management:form.fields.passportNo.placeholder",
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 7: Expected Salary */}
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+              <Col xs={24}>
+                <Form.Item<RegistrationFormValues>
+                  name="expectedSalary"
+                  label={t(
+                    "person-management:form.fields.expectedSalary.label",
+                  )}
+                  rules={validationRules.expectedSalary}
+                >
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    placeholder={t(
+                      "person-management:form.fields.expectedSalary.placeholder",
+                    )}
+                    formatter={(value) =>
+                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 8: Buttons */}
+            <Row gutter={16}>
+              <Col xs={24}>
+                <Form.Item>
+                  <Space>
+                    <Button type="primary" htmlType="submit">
+                      {t("person-management:form.buttons.submit")}
+                    </Button>
+                    <Button htmlType="reset">
+                      {t("person-management:form.buttons.reset")}
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
         </div>
 
+        {/* section 2 */}
         <Card>
+          <div style={{ marginBottom: 16 }}>
+            <Space>
+              <Button
+                type="primary"
+                danger
+                onClick={handleDeleteSelected}
+                disabled={selectedRowKeys.length === 0}
+              >
+                ลบรายการที่เลือก ({selectedRowKeys.length})
+              </Button>
+            </Space>
+          </div>
           <Table
             dataSource={paginatedData}
             columns={columns}
             rowKey="id"
+            rowSelection={rowSelection}
             pagination={{
               current: pagination.current,
               pageSize: pagination.pageSize,
@@ -208,74 +631,6 @@ const PersonManagement = () => {
             }}
           />
         </Card>
-
-        <Modal
-          title={editingPerson ? "Edit Person" : "Add Person"}
-          open={isModalOpen}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          confirmLoading={loading}
-          width={600}
-        >
-          <Form form={form} layout="vertical" initialValues={{ age: 25 }}>
-            <Form.Item
-              name="name"
-              label="Name"
-              rules={[{ required: true, message: "Please input name!" }]}
-            >
-              <Input placeholder="Enter name" />
-            </Form.Item>
-
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[
-                { required: true, message: "Please input email!" },
-                { type: "email", message: "Please enter valid email!" },
-              ]}
-            >
-              <Input placeholder="Enter email" />
-            </Form.Item>
-
-            <Form.Item
-              name="phone"
-              label="Phone"
-              rules={[
-                { required: true, message: "Please input phone!" },
-                {
-                  pattern: /^[0-9]{10}$/,
-                  message: "Please enter 10-digit phone number!",
-                },
-              ]}
-            >
-              <Input placeholder="Enter phone number" />
-            </Form.Item>
-
-            <Form.Item
-              name="address"
-              label="Address"
-              rules={[{ required: true, message: "Please input address!" }]}
-            >
-              <Input.TextArea placeholder="Enter address" rows={3} />
-            </Form.Item>
-
-            <Form.Item
-              name="age"
-              label="Age"
-              rules={[
-                { required: true, message: "Please input age!" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 120,
-                  message: "Age must be between 1-120!",
-                },
-              ]}
-            >
-              <Input type="number" placeholder="Enter age" />
-            </Form.Item>
-          </Form>
-        </Modal>
       </div>
     </div>
   );

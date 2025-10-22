@@ -1,6 +1,8 @@
 import AntdProvider from "@/components/AntdProvider";
 import I18nProvider from "@/components/providers/I18nProvider";
 import Navbar from "@/components/Navbar";
+import ReduxProvider from "@/components/providers/ReduxProvider";
+import { App } from "antd";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -32,12 +34,16 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${geist.variable} ${geistMono.variable} font-sans`}>
-        <I18nProvider>
-          <AntdProvider>
-            <Navbar />
-            {children}
-          </AntdProvider>
-        </I18nProvider>
+        <ReduxProvider>
+          <I18nProvider>
+            <AntdProvider>
+              <App>
+                <Navbar />
+                {children}
+              </App>
+            </AntdProvider>
+          </I18nProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

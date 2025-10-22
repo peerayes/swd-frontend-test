@@ -6,10 +6,12 @@ import enCommon from "@/locales/en/common.json";
 import enHome from "@/locales/en/home.json";
 import enDesignSystem from "@/locales/en/design-system.json";
 import enNav from "@/locales/en/nav.json";
+import enPersonManagement from "@/locales/en/person-management/form.json";
 import thCommon from "@/locales/th/common.json";
 import thHome from "@/locales/th/home.json";
 import thDesignSystem from "@/locales/th/design-system.json";
 import thNav from "@/locales/th/nav.json";
+import thPersonManagement from "@/locales/th/person-management/form.json";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -18,12 +20,14 @@ i18n.use(initReactI18next).init({
       home: enHome,
       "design-system": enDesignSystem,
       nav: enNav,
+      "person-management": enPersonManagement,
     },
     th: {
       common: thCommon,
       home: thHome,
       "design-system": thDesignSystem,
       nav: thNav,
+      "person-management": thPersonManagement,
     },
   },
   lng: "en", // Always start with English to avoid hydration mismatch
