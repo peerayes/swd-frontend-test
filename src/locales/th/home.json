@@ -3,5 +3,15 @@
   "subtitle": "สร้างประสบการณ์ที่น่าทึ่งกับ Next.js และ Ant Design",
   "description": "นี่คือเว็บแอปพลิเคชันสมัยใหม่ที่สร้างด้วยเทคโนโลยีล่าสุด",
   "getStarted": "เริ่มต้นใช้งาน",
-  "learnMore": "เรียนรู้เพิ่มเติม"
+  "learnMore": "เรียนรู้เพิ่มเติม",
+  "fontTestSection": {
+    "title": "ส่วนทดสอบฟอนต์",
+    "defaultFont": "ฟอนต์ปกติ (sans-serif)",
+    "monospaceFont": "ฟอนต์ความกว้างคงที่ (Monospace)",
+    "systemFont": "ฟอนต์ระบบ (System Fallback)",
+    "classUsed": "คลาสที่ใช้:",
+    "mainFont": "(ฟอนต์หลัก)",
+    "codeFont": "(สำหับโค้ด/ตัวอักษรความกว้างคงที่)",
+    "fallbackFont": "(สำรองเมื่อฟอนต์หลักโหลดไม่ได้)"
+  }
 }

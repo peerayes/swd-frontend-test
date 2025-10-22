@@ -3,5 +3,15 @@
   "subtitle": "Build amazing experiences with Next.js and Ant Design",
   "description": "This is a modern web application built with the latest technologies.",
   "getStarted": "Get Started",
-  "learnMore": "Learn More"
+  "learnMore": "Learn More",
+  "fontTestSection": {
+    "title": "Font Test Section",
+    "defaultFont": "Default Font (sans-serif)",
+    "monospaceFont": "Monospace Font",
+    "systemFont": "System Font Fallback",
+    "classUsed": "Class used:",
+    "mainFont": "(main font)",
+    "codeFont": "(for code/fixed-width text)",
+    "fallbackFont": "(fallback when main font fails to load)"
+  }
 }

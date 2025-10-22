@@ -3,25 +3,46 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --background: #ffffff;
+    --foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+    color: var(--foreground);
+    background: var(--background);
+    font-family: var(--font-geist), system-ui, sans-serif;
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+/* Debug: Check if custom fonts are loaded */
+.font-debug {
+    font-family: var(--font-geist), system-ui, sans-serif;
+}
+
+.font-debug-mono {
+    font-family: var(--font-geist-mono), monospace;
+}
+
+/* Force font loading test */
+@font-face {
+    font-family: "GeistTest";
+    src: local("GeistVF"), local("Geist");
+    font-display: swap;
+}
+
+body {
+    /* Debug: Show if custom fonts are working */
+    font-family: var(--font-geist), system-ui, sans-serif;
 }
