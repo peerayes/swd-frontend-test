@@ -5,7 +5,6 @@ import {
   Card,
   Form,
   Input,
-  Modal,
   Space,
   Table,
   App,
@@ -15,12 +14,13 @@ import {
   DatePicker,
   Radio,
   InputNumber,
+  Popconfirm,
 } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState, useMemo } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-import { useTranslation as useReactTranslation } from "react-i18next";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
+import { useToast } from "@/hooks/use-toast";
 import type {
   Person,
   RegistrationFormValues,
@@ -31,6 +31,11 @@ import type {
 } from "@/types/person.types";
 import { createValidationRules } from "@/types/person.types";
 import {
+  countryCodeOptions,
+  nationalityOptions,
+} from "@/constants/countryOptions";
+import { renderSelectOptions } from "@/components/shared/SelectOption";
+import {
   addPerson,
   deletePerson,
   updatePerson,
@@ -39,14 +44,14 @@ import {
 import { useAppSelector, useAppDispatch } from "@/store/store";
 
 const PersonManagement = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("person-management");
   const { message } = App.useApp();
+  const { toast } = useToast();
   const persons = useAppSelector((state) => state.persons) as Person[];
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
+
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -89,11 +94,16 @@ const PersonManagement = () => {
     dispatch(addPerson(newPerson));
     localStorage.setItem("persons", JSON.stringify([...persons, newPerson]));
 
-    message.success(t("person-management:form.messages.registrationSuccess"));
+    message.success(t("form.messages.registrationSuccess"));
   };
 
   const handleFormReset = () => {
-    message.info(t("person-management:form.messages.resetInfo"));
+    setEditingPerson(null);
+    form.resetFields();
+    form.setFieldsValue({
+      expectedSalary: 0,
+    });
+    message.info(t("form.messages.resetInfo"));
   };
 
   // Load data from localStorage on mount
@@ -112,6 +122,14 @@ const PersonManagement = () => {
     }
   }, [persons]);
 
+  // Set initial form values on mount
+  useEffect(() => {
+    if (!editingPerson) {
+      form.setFieldsValue({
+        expectedSalary: 0,
+      });
+    }
+  }, [editingPerson, form]);
   const handleEdit = (person: Person) => {
     setEditingPerson(person);
     form.setFieldsValue({
@@ -131,7 +149,14 @@ const PersonManagement = () => {
       passportNo: person.passportNo,
       expectedSalary: person.expectedSalary,
     });
-    setIsModalOpen(true);
+
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    toast({
+      title: "โหมดแก้ไข",
+      description: `กำลังแก้ไขข้อมูลของ ${person.name}`,
+    });
   };
 
   const handleUpdate = (values: RegistrationFormValues) => {
@@ -159,24 +184,26 @@ const PersonManagement = () => {
     };
 
     dispatch(updatePerson(updatedPerson));
-    setIsModalOpen(false);
     setEditingPerson(null);
     form.resetFields();
-    message.success(t("person-management:form.messages.updateSuccess"));
+    toast({
+      title: "อัปเดตข้อมูลสำเร็จ",
+      description: t("form.messages.updateSuccess"),
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPerson(null);
+    form.resetFields();
+    toast({
+      title: "ยกเลิกการแก้ไข",
+      description: "กลับสู่โหมดเพิ่มข้อมูลใหม่",
+    });
   };
 
   const handleDelete = (id: string) => {
-    Modal.confirm({
-      title: t("person-management:table.confirm.delete.title"),
-      content: t("person-management:table.confirm.delete.content"),
-      okText: t("person-management:table.confirm.delete.okText"),
-      okType: "danger",
-      cancelText: t("person-management:table.confirm.delete.cancelText"),
-      onOk: () => {
-        dispatch(deletePerson(id));
-        message.success(t("person-management:table.messages.deleteSuccess"));
-      },
-    });
+    dispatch(deletePerson(id));
+    message.success(t("table.messages.deleteSuccess"));
   };
 
   const handleDeleteSelected = () => {
@@ -185,22 +212,12 @@ const PersonManagement = () => {
       return;
     }
 
-    Modal.confirm({
-      title: `ลบรายการที่เลือก (${selectedRowKeys.length} รายการ)`,
-      content: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการที่เลือกทั้งหมด?",
-      okText: "ลบทั้งหมด",
-      okType: "danger",
-      cancelText: "ยกเลิก",
-      onOk: () => {
-        selectedRowKeys.forEach((id) => {
-          dispatch(deletePerson(id));
-        });
-        setSelectedRowKeys([]);
-        message.success(
-          `ลบรายการที่เลือก ${selectedRowKeys.length} รายการเรียบร้อย`,
-        );
-      },
+    selectedRowKeys.forEach((id) => {
+      dispatch(deletePerson(id));
     });
+    const deletedCount = selectedRowKeys.length;
+    setSelectedRowKeys([]);
+    message.success(`ลบรายการที่เลือก ${deletedCount} รายการเรียบร้อยแล้ว`);
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -214,10 +231,17 @@ const PersonManagement = () => {
 
   const columns = [
     {
-      title: t("person-management:table.columns.title"),
-      dataIndex: "title",
-      key: "title",
-      width: 80,
+      title: "ชื่อ-นามสกุล",
+      key: "fullname",
+      width: 200,
+      render: (_: any, record: Person) => (
+        <div>
+          <div className="font-medium">
+            {record.firstname} {record.lastname}
+          </div>
+          {/*<div className="text-sm text-gray-500">{record.title}</div>*/}
+        </div>
+      ),
     },
     {
       title: "เพศ",
@@ -227,10 +251,10 @@ const PersonManagement = () => {
       render: (gender: string) => (
         <span style={{ textTransform: "capitalize" }}>
           {gender === "male"
-            ? t("person-management:form.fields.gender.options.male")
+            ? t("form.fields.gender.options.male")
             : gender === "female"
-              ? t("person-management:form.fields.gender.options.female")
-              : t("person-management:form.fields.gender.options.unsex")}
+              ? t("form.fields.gender.options.female")
+              : t("form.fields.gender.options.unsex")}
         </span>
       ),
     },
@@ -248,7 +272,7 @@ const PersonManagement = () => {
       render: (nationality: string) => (
         <span style={{ textTransform: "capitalize" }}>
           {nationality === "thai"
-            ? t("person-management:form.fields.nationality.options.thai")
+            ? t("form.fields.nationality.options.thai")
             : nationality}
         </span>
       ),
@@ -264,16 +288,18 @@ const PersonManagement = () => {
             size="small"
             onClick={() => handleEdit(record)}
           >
-            {t("person-management:table.actions.edit")}
+            {t("table.actions.edit")}
           </Button>
-          <Button
-            type="primary"
-            danger
-            size="small"
-            onClick={() => handleDelete(record.id)}
+          <Popconfirm
+            title={t("table.confirm.delete.title")}
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            {t("person-management:table.actions.delete")}
-          </Button>
+            <Button type="primary" danger size="small">
+              {t("table.actions.delete")}
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -296,24 +322,24 @@ const PersonManagement = () => {
               margin: "0 0 24px 0",
             }}
           >
-            {t("person-management:form.title")}
+            {editingPerson
+              ? `แก้ไขข้อมูล: ${editingPerson.name}`
+              : t("form.title")}
           </h1>
 
           <Form<RegistrationFormValues>
             id="register"
+            form={form}
             layout="vertical"
-            initialValues={{
-              expectedSalary: 0,
-            }}
-            onFinish={handleFormSubmit}
+            onFinish={editingPerson ? handleUpdate : handleFormSubmit}
             onReset={handleFormReset}
           >
-            {/* Row 1: Title, Firstname, Lastname */}
+            {/* Row 1: Title, Firstname, Lastname, Gender */}
             <Row gutter={16} style={{ marginBottom: 16 }}>
-              <Col xs={24} sm={8}>
+              <Col xs={24} sm={4}>
                 <Form.Item<RegistrationFormValues>
                   name="title"
-                  label={t("person-management:form.fields.title.label")}
+                  label={t("form.fields.title.label")}
                   rules={validationRules.title}
                 >
                   <Select<TitleOption["value"]>
@@ -322,255 +348,202 @@ const PersonManagement = () => {
                     )}
                   >
                     <Select.Option value="นาย">
-                      {t("person-management:form.fields.title.options.นาย")}
+                      {t("form.fields.title.options.นาย")}
                     </Select.Option>
                     <Select.Option value="นาง">
-                      {t("person-management:form.fields.title.options.นาง")}
+                      {t("form.fields.title.options.นาง")}
                     </Select.Option>
                     <Select.Option value="นางสาว">
-                      {t("person-management:form.fields.title.options.นางสาว")}
+                      {t("form.fields.title.options.นางสาว")}
                     </Select.Option>
                   </Select>
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={8}>
+              <Col xs={24} sm={5}>
                 <Form.Item<RegistrationFormValues>
                   name="firstname"
-                  label={t("person-management:form.fields.firstname.label")}
+                  label={t("form.fields.firstname.label")}
                   rules={validationRules.firstname}
                 >
-                  <Input
-                    placeholder={t(
-                      "person-management:form.fields.firstname.placeholder",
-                    )}
-                  />
+                  <Input placeholder={t("form.fields.firstname.placeholder")} />
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={8}>
+              <Col xs={24} sm={5}>
                 <Form.Item<RegistrationFormValues>
                   name="lastname"
-                  label={t("person-management:form.fields.lastname.label")}
+                  label={t("form.fields.lastname.label")}
                   rules={validationRules.lastname}
                 >
-                  <Input
-                    placeholder={t(
-                      "person-management:form.fields.lastname.placeholder",
-                    )}
-                  />
+                  <Input placeholder={t("form.fields.lastname.placeholder")} />
                 </Form.Item>
               </Col>
-            </Row>
-
-            {/* Row 2: Birthday, Nationality */}
-            <Row gutter={16} style={{ marginBottom: 16 }}>
-              <Col xs={24} sm={12}>
-                <Form.Item<RegistrationFormValues>
-                  name="birthday"
-                  label={t("person-management:form.fields.birthday.label")}
-                  rules={validationRules.birthday}
-                >
-                  <DatePicker
-                    style={{ width: "100%" }}
-                    placeholder={t(
-                      "person-management:form.fields.birthday.placeholder",
-                    )}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12}>
-                <Form.Item<RegistrationFormValues>
-                  name="nationality"
-                  label={t("person-management:form.fields.nationality.label")}
-                  rules={validationRules.nationality}
-                >
-                  <Select<NationalityOption["value"]>
-                    placeholder={t(
-                      "person-management:form.fields.nationality.placeholder",
-                    )}
-                  >
-                    <Select.Option value="thai">
-                      {t(
-                        "person-management:form.fields.nationality.options.thai",
-                      )}
-                    </Select.Option>
-                    <Select.Option value="other">
-                      {t(
-                        "person-management:form.fields.nationality.options.other",
-                      )}
-                    </Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-
-            {/* Row 3: Citizen ID */}
-            <Row gutter={16} style={{ marginBottom: 16 }}>
-              <Col xs={24}>
-                <Form.Item
-                  label={t("person-management:form.fields.citizenId.label")}
-                  required
-                >
-                  <Space.Compact>
-                    <Form.Item<RegistrationFormValues>
-                      name="citizenId1"
-                      noStyle
-                      rules={validationRules.citizenId1}
-                    >
-                      <Input
-                        style={{ width: "50px", textAlign: "center" }}
-                        maxLength={1}
-                      />
-                    </Form.Item>
-                    <Form.Item<RegistrationFormValues>
-                      name="citizenId2"
-                      noStyle
-                      rules={validationRules.citizenId2}
-                    >
-                      <Input
-                        style={{ width: "150px", textAlign: "center" }}
-                        maxLength={4}
-                      />
-                    </Form.Item>
-                    <Form.Item<RegistrationFormValues>
-                      name="citizenId3"
-                      noStyle
-                      rules={validationRules.citizenId3}
-                    >
-                      <Input
-                        style={{ width: "180px", textAlign: "center" }}
-                        maxLength={5}
-                      />
-                    </Form.Item>
-                    <Form.Item<RegistrationFormValues>
-                      name="citizenId4"
-                      noStyle
-                      rules={validationRules.citizenId4}
-                    >
-                      <Input
-                        style={{ width: "80px", textAlign: "center" }}
-                        maxLength={2}
-                      />
-                    </Form.Item>
-                    <Form.Item<RegistrationFormValues>
-                      name="citizenId5"
-                      noStyle
-                      rules={validationRules.citizenId5}
-                    >
-                      <Input
-                        style={{ width: "50px", textAlign: "center" }}
-                        maxLength={1}
-                      />
-                    </Form.Item>
-                  </Space.Compact>
-                </Form.Item>
-              </Col>
-            </Row>
-
-            {/* Row 4: Gender */}
-            <Row gutter={16} style={{ marginBottom: 16 }}>
-              <Col xs={24}>
+              <Col xs={24} sm={10}>
                 <Form.Item<RegistrationFormValues>
                   name="gender"
-                  label={t("person-management:form.fields.gender.label")}
+                  label={t("form.fields.gender.label")}
                   rules={validationRules.gender}
                 >
                   <Radio.Group>
                     <Radio value="male">
-                      {t("person-management:form.fields.gender.options.male")}
+                      {t("form.fields.gender.options.male")}
                     </Radio>
                     <Radio value="female">
-                      {t("person-management:form.fields.gender.options.female")}
+                      {t("form.fields.gender.options.female")}
                     </Radio>
                     <Radio value="unsex">
-                      {t("person-management:form.fields.gender.options.unsex")}
+                      {t("form.fields.gender.options.unsex")}
                     </Radio>
                   </Radio.Group>
                 </Form.Item>
               </Col>
             </Row>
 
-            {/* Row 5: Mobile Phone */}
+            {/* Row 2: Birthday, Nationality, Citizen ID */}
             <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={8}>
+                <Form.Item<RegistrationFormValues>
+                  name="birthday"
+                  label={t("form.fields.birthday.label")}
+                  rules={validationRules.birthday}
+                >
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    placeholder={t("form.fields.birthday.placeholder")}
+                  />
+                </Form.Item>
+              </Col>
               <Col xs={24} sm={6}>
                 <Form.Item<RegistrationFormValues>
-                  name="countryCode"
-                  label={t("person-management:form.fields.countryCode.label")}
-                  rules={validationRules.countryCode}
+                  name="nationality"
+                  label={t("form.fields.nationality.label")}
+                  rules={validationRules.nationality}
                 >
-                  <Select<CountryCodeOption["value"]>
-                    placeholder={t(
-                      "person-management:form.fields.countryCode.placeholder",
-                    )}
+                  <Select
+                    placeholder={t("form.fields.nationality.placeholder")}
                   >
-                    <Select.Option value="+66">
-                      {t(
-                        "person-management:form.fields.countryCode.options.+66",
-                      )}
-                    </Select.Option>
-                    <Select.Option value="+1">
-                      {t(
-                        "person-management:form.fields.countryCode.options.+1",
-                      )}
-                    </Select.Option>
-                    <Select.Option value="+44">
-                      {t(
-                        "person-management:form.fields.countryCode.options.+44",
-                      )}
-                    </Select.Option>
+                    {renderSelectOptions(nationalityOptions, false, t)}
                   </Select>
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={18}>
+              <Col xs={24} sm={10}>
+                <Form.Item label={t("form.fields.citizenId.label")} required>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId1"
+                      noStyle
+                      rules={validationRules.citizenId1}
+                    >
+                      <Input
+                        style={{ width: "40px", textAlign: "center" }}
+                        maxLength={1}
+                      />
+                    </Form.Item>
+                    <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+                      -
+                    </span>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId2"
+                      noStyle
+                    >
+                      <Input
+                        style={{ width: "80px", textAlign: "center" }}
+                        maxLength={4}
+                      />
+                    </Form.Item>
+                    <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+                      -
+                    </span>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId3"
+                      noStyle
+                    >
+                      <Input
+                        style={{ width: "100px", textAlign: "center" }}
+                        maxLength={5}
+                      />
+                    </Form.Item>
+                    <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+                      -
+                    </span>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId4"
+                      noStyle
+                    >
+                      <Input
+                        style={{ width: "50px", textAlign: "center" }}
+                        maxLength={2}
+                      />
+                    </Form.Item>
+                    <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+                      -
+                    </span>
+                    <Form.Item<RegistrationFormValues>
+                      name="citizenId5"
+                      noStyle
+                    >
+                      <Input
+                        style={{ width: "40px", textAlign: "center" }}
+                        maxLength={1}
+                      />
+                    </Form.Item>
+                  </div>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Row 3: Country Code, Mobile Phone, Passport, Salary */}
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+              <Col xs={24} sm={5}>
+                <Form.Item<RegistrationFormValues>
+                  name="countryCode"
+                  label={t("form.fields.countryCode.label")}
+                  rules={validationRules.countryCode}
+                >
+                  <Select
+                    placeholder={t("form.fields.countryCode.placeholder")}
+                  >
+                    {renderSelectOptions(countryCodeOptions, true, t)}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={6}>
                 <Form.Item<RegistrationFormValues>
                   name="mobilePhone"
-                  label={t("person-management:form.fields.mobilePhone.label")}
+                  label={t("form.fields.mobilePhone.label")}
                   rules={validationRules.mobilePhone}
                 >
                   <Input
-                    placeholder={t(
-                      "person-management:form.fields.mobilePhone.placeholder",
-                    )}
+                    placeholder={t("form.fields.mobilePhone.placeholder")}
                   />
                 </Form.Item>
               </Col>
-            </Row>
-
-            {/* Row 6: Passport No */}
-            <Row gutter={16} style={{ marginBottom: 16 }}>
-              <Col xs={24}>
+              <Col xs={24} sm={6}>
                 <Form.Item<RegistrationFormValues>
                   name="passportNo"
-                  label={t("person-management:form.fields.passportNo.label")}
+                  label={t("form.fields.passportNo.label")}
                   rules={validationRules.passportNo}
                 >
                   <Input
-                    placeholder={t(
-                      "person-management:form.fields.passportNo.placeholder",
-                    )}
+                    placeholder={t("form.fields.passportNo.placeholder")}
                   />
                 </Form.Item>
               </Col>
-            </Row>
-
-            {/* Row 7: Expected Salary */}
-            <Row gutter={16} style={{ marginBottom: 24 }}>
-              <Col xs={24}>
+              <Col xs={24} sm={7}>
                 <Form.Item<RegistrationFormValues>
                   name="expectedSalary"
-                  label={t(
-                    "person-management:form.fields.expectedSalary.label",
-                  )}
+                  label={t("form.fields.expectedSalary.label")}
                   rules={validationRules.expectedSalary}
                 >
                   <InputNumber
                     style={{ width: "100%" }}
-                    placeholder={t(
-                      "person-management:form.fields.expectedSalary.placeholder",
-                    )}
-                    formatter={(value) =>
-                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                    placeholder={t("form.fields.expectedSalary.placeholder")}
+                    min={0}
                   />
                 </Form.Item>
               </Col>
@@ -582,11 +555,14 @@ const PersonManagement = () => {
                 <Form.Item>
                   <Space>
                     <Button type="primary" htmlType="submit">
-                      {t("person-management:form.buttons.submit")}
+                      {editingPerson
+                        ? "อัปเดตข้อมูล"
+                        : t("form.buttons.submit")}
                     </Button>
-                    <Button htmlType="reset">
-                      {t("person-management:form.buttons.reset")}
-                    </Button>
+                    {editingPerson && (
+                      <Button onClick={handleCancelEdit}>ยกเลิกการแก้ไข</Button>
+                    )}
+                    <Button htmlType="reset">{t("form.buttons.reset")}</Button>
                   </Space>
                 </Form.Item>
               </Col>
@@ -598,14 +574,21 @@ const PersonManagement = () => {
         <Card>
           <div style={{ marginBottom: 16 }}>
             <Space>
-              <Button
-                type="primary"
-                danger
-                onClick={handleDeleteSelected}
+              <Popconfirm
+                title={`ลบรายการที่เลือก (${selectedRowKeys.length} รายการ)`}
+                onConfirm={handleDeleteSelected}
+                okText="Yes"
+                cancelText="No"
                 disabled={selectedRowKeys.length === 0}
               >
-                ลบรายการที่เลือก ({selectedRowKeys.length})
-              </Button>
+                <Button
+                  type="primary"
+                  danger
+                  disabled={selectedRowKeys.length === 0}
+                >
+                  ลบรายการที่เลือก ({selectedRowKeys.length})
+                </Button>
+              </Popconfirm>
             </Space>
           </div>
           <Table

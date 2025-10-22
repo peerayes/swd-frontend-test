@@ -2,6 +2,7 @@ import AntdProvider from "@/components/AntdProvider";
 import I18nProvider from "@/components/providers/I18nProvider";
 import Navbar from "@/components/Navbar";
 import ReduxProvider from "@/components/providers/ReduxProvider";
+import { Toaster } from "@/components/ui/toaster";
 import { App } from "antd";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -40,6 +41,7 @@ export default function RootLayout({
               <App>
                 <Navbar />
                 {children}
+                <Toaster />
               </App>
             </AntdProvider>
           </I18nProvider>

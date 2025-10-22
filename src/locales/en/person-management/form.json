@@ -101,13 +101,7 @@
           "min": "Lastname must be at least 2 characters!",
           "pattern": "Lastname must contain only letters!"
         },
-        "citizenId": {
-          "part1": "Must be 1 digit!",
-          "part2": "Must be 4 digits!",
-          "part3": "Must be 5 digits!",
-          "part4": "Must be 2 digits!",
-          "part5": "Must be 1 digit!"
-        },
+        "citizenId": "Please enter numbers only",
         "mobilePhone": "Please enter valid phone number!",
         "passportNo": "Please enter valid passport number!",
         "expectedSalary": "Salary must be positive!"
@@ -116,7 +110,8 @@
     "messages": {
       "submitSuccess": "Form submitted successfully!",
       "resetInfo": "Form has been reset",
-      "registrationSuccess": "Registration completed successfully!"
+      "registrationSuccess": "Registration completed successfully!",
+      "editMode": "Edit mode activated"
     }
   },
   "table": {

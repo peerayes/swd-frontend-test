@@ -134,32 +134,36 @@ export const createValidationRules = (
   ],
   citizenId1: [
     {
+      required: true,
+      message: t("person-management:form.validation.format.citizenId"),
+    },
+    {
       pattern: /^[0-9]$/,
-      message: t("person-management:form.validation.format.citizenId.part1"),
+      message: t("person-management:form.validation.format.citizenId"),
     },
   ],
   citizenId2: [
     {
       pattern: /^[0-9]{4}$/,
-      message: t("person-management:form.validation.format.citizenId.part2"),
+      message: "",
     },
   ],
   citizenId3: [
     {
       pattern: /^[0-9]{5}$/,
-      message: t("person-management:form.validation.format.citizenId.part3"),
+      message: "",
     },
   ],
   citizenId4: [
     {
       pattern: /^[0-9]{2}$/,
-      message: t("person-management:form.validation.format.citizenId.part4"),
+      message: "",
     },
   ],
   citizenId5: [
     {
       pattern: /^[0-9]$/,
-      message: t("person-management:form.validation.format.citizenId.part5"),
+      message: "",
     },
   ],
   gender: [

@@ -16,5 +16,22 @@
   "ok": "ตกลง",
   "yes": "ใช่",
   "no": "ไม่ใช่",
-  "personManagement": "การจัดการบุคคล"
+  "personManagement": "การจัดการบุคคล",
+  "countryCodes": {
+    "thailand": "ประเทศไทย",
+    "usa": "สหรัฐอเมริกา",
+    "uk": "สหราชอาณาจักร",
+    "japan": "ญี่ปุ่น",
+    "china": "จีน",
+    "malaysia": "มาเลเซีย",
+    "singapore": "สิงคโปร์",
+    "india": "อินเดีย",
+    "southKorea": "เกาหลีใต้",
+    "france": "ฝรั่งเศส",
+    "germany": "เยอรมนี",
+    "australia": "ออสเตรเลีย",
+    "canada": "แคนาดา",
+    "italy": "อิตาลี",
+    "spain": "สเปน"
+  }
 }

@@ -16,5 +16,22 @@
   "ok": "OK",
   "yes": "Yes",
   "no": "No",
-  "personManagement": "Person Management"
+  "personManagement": "Person Management",
+  "countryCodes": {
+    "thailand": "Thailand",
+    "usa": "United States",
+    "uk": "United Kingdom",
+    "japan": "Japan",
+    "china": "China",
+    "malaysia": "Malaysia",
+    "singapore": "Singapore",
+    "india": "India",
+    "southKorea": "South Korea",
+    "france": "France",
+    "germany": "Germany",
+    "australia": "Australia",
+    "canada": "Canada",
+    "italy": "Italy",
+    "spain": "Spain"
+  }
 }
