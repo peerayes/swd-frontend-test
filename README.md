@@ -1,7 +1,3 @@
-# swd-frontend-test
-
-SPA (single page application) ด้วย Ant Design เก็บข้อมูลบุคคล
-
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

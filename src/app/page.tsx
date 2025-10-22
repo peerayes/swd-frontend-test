@@ -1,128 +1,81 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Provider } from "react-redux";
-import { store } from "@/store/store";
-import { useDispatch, useSelector } from "react-redux";
-import { addPerson, updatePerson, setCurrentPerson } from "@/store/personSlice";
-import { PersonFormData, Person } from "@/types/person";
-import { RootState } from "@/store/store";
-import { th } from "@/locales/th";
-import { en } from "@/locales/en";
-import dayjs from "dayjs";
+import { Button, Typography, Card, Space } from "antd";
+import { useTranslation } from "react-i18next";
 
-// Direct imports - no dynamic imports for simplicity
-import PersonForm from "@/components/PersonForm";
-import PersonTable from "@/components/PersonTable";
-import LanguageSwitch from "@/components/LanguageSwitch";
+const { Title, Paragraph } = Typography;
 
-const AppContent: React.FC = () => {
-  const dispatch = useDispatch();
-  const { language, currentPerson } = useSelector((state: RootState) => state.person);
-  const [editingId, setEditingId] = useState<string | undefined>();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Use default Thai language on server-side to prevent hydration mismatch
-  const t = mounted && language === "en" ? en : th;
-
-  const handleFormSubmit = (formData: PersonFormData) => {
-    // Construct citizenId from separate form fields
-    const citizenId = [
-      formData.citizenId1 || "",
-      formData.citizenId2 || "",
-      formData.citizenId3 || "",
-      formData.citizenId4 || "",
-      formData.citizenId5 || "",
-    ]
-      .filter((part) => part.trim() !== "")
-      .join("-");
-
-    const personData: Person = {
-      id: editingId || Date.now().toString(),
-      title: formData.title || "",
-      firstName: formData.firstName || "",
-      lastName: formData.lastName || "",
-      birthDate: formData.birthDate || "",
-      birthDateDisplay: formData.birthDateDisplay || "",
-      age: formData.age,
-      nationality: formData.nationality || "",
-      citizenId: citizenId,
-      gender: formData.gender || "male",
-      mobilePhone: {
-        countryCode: formData.countryCode || "",
-        number: formData.mobilePhone || "",
-      },
-      passportNo: formData.passportNo,
-      expectedSalary: formData.expectedSalary || 0,
-      createdAt: editingId ? currentPerson.createdAt || new Date().toISOString() : new Date().toISOString(),
-    };
-
-    if (editingId) {
-      dispatch(updatePerson({ id: editingId, data: personData }));
-      setEditingId(undefined);
-    } else {
-      dispatch(addPerson(personData));
-    }
-  };
-
-  const handleEdit = (person: Person) => {
-    setEditingId(person.id);
-
-    // Parse citizen ID
-    const citizenIdParts = person.citizenId.split("-");
-
-    const formData: PersonFormData = {
-      title: person.title,
-      firstName: person.firstName,
-      lastName: person.lastName,
-      birthDate: person.birthDate,
-      birthDateDisplay: person.birthDateDisplay,
-      age: person.age,
-      nationality: person.nationality,
-      citizenId1: citizenIdParts[0],
-      citizenId2: citizenIdParts[1],
-      citizenId3: citizenIdParts[2],
-      citizenId4: citizenIdParts[3],
-      citizenId5: citizenIdParts[4],
-      gender: person.gender,
-      countryCode: person.mobilePhone.countryCode,
-      mobilePhone: person.mobilePhone.number,
-      passportNo: person.passportNo,
-      expectedSalary: person.expectedSalary,
-      createdAt: person.createdAt,
-    };
-
-    dispatch(setCurrentPerson(formData));
-  };
-
-
+export default function Home() {
+  const { t } = useTranslation();
 
   return (
-    <div className="app-container">
-        <div className="page-header">
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>{t.formAndTable}</h1>
-          <LanguageSwitch />
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-red-50 to-pink-50 py-20">
+        <div className="max-w-6xl mx-auto px-8 text-center">
+          <Title level={1} className="mb-6" style={{ color: "#E53E3E" }}>
+            {t("home:title")}
+          </Title>
+
+          <Title
+            level={3}
+            className="mb-8"
+            style={{ color: "#666", fontWeight: 400 }}
+          >
+            {t("home:subtitle")}
+          </Title>
+
+          <Paragraph
+            className="text-lg mb-10"
+            style={{ color: "#888", maxWidth: "600px", margin: "0 auto 40px" }}
+          >
+            {t("home:description")}
+          </Paragraph>
+
+          <Space size="large">
+            <Button
+              type="primary"
+              size="large"
+              style={{ backgroundColor: "#E53E3E", borderColor: "#E53E3E" }}
+            >
+              {t("home:getStarted")}
+            </Button>
+            <Button size="large">{t("home:learnMore")}</Button>
+          </Space>
         </div>
+      </div>
 
-        <div className="content-wrapper">
-          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-            <PersonForm onSubmit={handleFormSubmit} editingId={editingId} />
+      {/* Features Section */}
+      <div className="py-20">
+        <div className="max-w-6xl mx-auto px-8">
+          <Title level={2} className="text-center mb-12">
+            Features
+          </Title>
 
-            <PersonTable onEdit={handleEdit} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card hoverable style={{ textAlign: "center", height: "200px" }}>
+              <Title level={4} style={{ color: "#E53E3E" }}>
+                Move Shape
+              </Title>
+              <Paragraph>Interactive shape movement with controls</Paragraph>
+            </Card>
+
+            <Card hoverable style={{ textAlign: "center", height: "200px" }}>
+              <Title level={4} style={{ color: "#E53E3E" }}>
+                Person Management
+              </Title>
+              <Paragraph>Complete CRUD operations with local storage</Paragraph>
+            </Card>
+
+            <Card hoverable style={{ textAlign: "center", height: "200px" }}>
+              <Title level={4} style={{ color: "#E53E3E" }}>
+                Multi-language
+              </Title>
+              <Paragraph>Support for English and Thai languages</Paragraph>
+            </Card>
           </div>
         </div>
       </div>
-  );
-};
-
-export default function Home() {
-  return (
-    <Provider store={store}>
-      <AppContent />
-    </Provider>
+    </div>
   );
 }

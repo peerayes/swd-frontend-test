@@ -1,0 +1,11 @@
+{
+  "title": "Design System",
+  "subtitle": "Components and Guidelines",
+  "description": "Our design system provides a consistent set of components and guidelines for building user interfaces.",
+  "components": "Components",
+  "guidelines": "Guidelines",
+  "tokens": "Design Tokens",
+  "colors": "Colors",
+  "typography": "Typography",
+  "spacing": "Spacing"
+}
