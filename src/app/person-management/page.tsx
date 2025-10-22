@@ -40,6 +40,9 @@ import {
   deletePerson,
   updatePerson,
   setPersons,
+  setEditingPerson,
+  setSelectedRowKeys,
+  setPagination,
 } from "@/store/personSlice";
 import { useAppSelector, useAppDispatch } from "@/store/store";
 
@@ -47,17 +50,16 @@ const PersonManagement = () => {
   const { t } = useTranslation("person-management");
   const { message } = App.useApp();
   const { toast } = useToast();
-  const persons = useAppSelector((state) => state.persons) as Person[];
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
-  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-    total: 0,
-  });
+  // Redux state
+  const persons = useAppSelector((state) => state.persons.persons) as Person[];
+  const editingPerson = useAppSelector((state) => state.persons.editingPerson);
+  const selectedRowKeys = useAppSelector(
+    (state) => state.persons.selectedRowKeys,
+  );
+  const pagination = useAppSelector((state) => state.persons.pagination);
 
   // Dynamic validation rules with i18n - recreate on language change
   const validationRules = useMemo(() => createValidationRules(t), [t]);
@@ -98,7 +100,7 @@ const PersonManagement = () => {
   };
 
   const handleFormReset = () => {
-    setEditingPerson(null);
+    dispatch(setEditingPerson(null));
     form.resetFields();
     form.setFieldsValue({
       expectedSalary: 0,
@@ -110,7 +112,7 @@ const PersonManagement = () => {
   useEffect(() => {
     const savedPersons = localStorage.getItem("persons");
     if (savedPersons) {
-      const parsedPersons = JSON.parse(savedPersons) as Person[];
+      const parsedPersons = JSON.parse(savedPersons);
       dispatch(setPersons(parsedPersons));
     }
   }, [dispatch]);
@@ -131,7 +133,7 @@ const PersonManagement = () => {
     }
   }, [editingPerson, form]);
   const handleEdit = (person: Person) => {
-    setEditingPerson(person);
+    dispatch(setEditingPerson(person));
     form.setFieldsValue({
       title: person.title,
       firstname: person.firstname,
@@ -184,7 +186,7 @@ const PersonManagement = () => {
     };
 
     dispatch(updatePerson(updatedPerson));
-    setEditingPerson(null);
+    dispatch(setEditingPerson(null));
     form.resetFields();
     toast({
       title: "อัปเดตข้อมูลสำเร็จ",
@@ -193,7 +195,7 @@ const PersonManagement = () => {
   };
 
   const handleCancelEdit = () => {
-    setEditingPerson(null);
+    dispatch(setEditingPerson(null));
     form.resetFields();
     toast({
       title: "ยกเลิกการแก้ไข",
@@ -216,12 +218,12 @@ const PersonManagement = () => {
       dispatch(deletePerson(id));
     });
     const deletedCount = selectedRowKeys.length;
-    setSelectedRowKeys([]);
+    dispatch(setSelectedRowKeys([]));
     message.success(`ลบรายการที่เลือก ${deletedCount} รายการเรียบร้อยแล้ว`);
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys as string[]);
+    dispatch(setSelectedRowKeys(newSelectedRowKeys as string[]));
   };
 
   const rowSelection = {
@@ -605,11 +607,13 @@ const PersonManagement = () => {
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} items`,
               onChange: (page, pageSize) => {
-                setPagination({
-                  current: page,
-                  pageSize: pageSize || 10,
-                  total: persons.length,
-                });
+                dispatch(
+                  setPagination({
+                    current: page,
+                    pageSize: pageSize || 10,
+                    total: persons.length,
+                  }),
+                );
               },
             }}
           />
