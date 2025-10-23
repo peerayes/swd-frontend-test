@@ -313,53 +313,58 @@ const PersonTable = ({
           </Popconfirm>
         </Space>
       </div>
-      <Table
-        dataSource={paginatedData}
-        columns={columns}
-        rowKey="id"
-        rowSelection={rowSelection}
-        rowClassName={(record) =>
-          record.id === recentlyUpdatedId ? "recently-updated-row" : ""
-        }
-        onChange={(paginationInfo, filters, sorter) => {
-          const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
-          setSortInfo({
-            field: (sorterInfo.field as string) || "",
-            order: sorterInfo.order as "ascend" | "descend" | null,
-          });
+      <div className="overflow-x-auto md:overflow-visible">
+        <Table
+          dataSource={paginatedData}
+          columns={columns}
+          rowKey="id"
+          rowSelection={rowSelection}
+          rowClassName={(record) =>
+            record.id === recentlyUpdatedId ? "recently-updated-row" : ""
+          }
+          onChange={(paginationInfo, filters, sorter) => {
+            const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
+            setSortInfo({
+              field: (sorterInfo.field as string) || "",
+              order: sorterInfo.order as "ascend" | "descend" | null,
+            });
 
-          // Dispatch pagination changes to Redux
-          dispatch(
-            setPagination({
-              current: paginationInfo.current,
-              pageSize: paginationInfo.pageSize,
-              total: sortedData.length,
-            }),
-          );
-        }}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: sortedData.length,
-          showSizeChanger: true,
-          showTotal: (total: number, range: [number, number]) =>
-            t("table.pagination.total", {
-              start: range[0],
-              end: range[1],
-              total,
-            }),
-          pageSizeOptions: ["5", "10", "20", "50"],
-          onShowSizeChange: (current, size) => {
+            // Dispatch pagination changes to Redux
             dispatch(
               setPagination({
-                current: current,
-                pageSize: size,
+                current: paginationInfo.current,
+                pageSize: paginationInfo.pageSize,
                 total: sortedData.length,
               }),
             );
-          },
-        }}
-      />
+          }}
+          scroll={{
+            x: "max-content",
+          }}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: sortedData.length,
+            showSizeChanger: true,
+            showTotal: (total: number, range: [number, number]) =>
+              t("table.pagination.total", {
+                start: range[0],
+                end: range[1],
+                total,
+              }),
+            pageSizeOptions: ["5", "10", "20", "50"],
+            onShowSizeChange: (current, size) => {
+              dispatch(
+                setPagination({
+                  current: current,
+                  pageSize: size,
+                  total: sortedData.length,
+                }),
+              );
+            },
+          }}
+        />
+      </div>
     </Card>
   );
 };

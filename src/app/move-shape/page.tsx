@@ -210,7 +210,7 @@ export default function MoveShape() {
     <div className={`${styles.moveShapeContainer} min-h-screen bg-gray-50 p-8`}>
       <div className="max-w-4xl mx-auto">
         <Title level={2} className={`${styles.title} text-center mb-8`}>
-          Move Shape
+          {t("common:moveShape")}
         </Title>
         {/* Shape motion state */}
         <Card className={`${styles.gameArea} mb-6`}>

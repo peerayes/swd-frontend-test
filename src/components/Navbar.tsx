@@ -64,7 +64,7 @@ export default function Navbar() {
                 }
               `}
             >
-              Move Shape
+              {t("common:moveShape")}
             </Link>
             <Link
               href="/person-management"
