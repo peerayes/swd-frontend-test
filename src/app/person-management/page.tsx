@@ -31,17 +31,8 @@ const PersonManagement = () => {
   const editingPerson = useAppSelector((state) => state.persons.editingPerson);
   const pagination = useAppSelector((state) => state.persons.pagination);
 
-  // Trigger for table refresh after form submit
-  const [triggerTableRefresh, setTriggerTableRefresh] = useState(false);
-
-  // Sort state
-  const [sortInfo, setSortInfo] = useState<{
-    field: string;
-    order: "ascend" | "descend" | null;
-  }>({
-    field: "",
-    order: null,
-  });
+  // Table loading trigger
+  const [tableLoading, setTableLoading] = useState(false);
 
   // Form handlers with type safety
   const handleFormSubmit: FormSubmitHandler = async (
@@ -132,82 +123,27 @@ const PersonManagement = () => {
     dispatch(setEditingPerson(null));
   };
 
-  const handleAfterSubmit = () => {
-    // Toggle trigger to refresh table
-    setTriggerTableRefresh((prev) => !prev);
-  };
-
   const handleEdit = (person: Person) => {
     dispatch(setEditingPerson(person));
     // Scroll to form
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
-    setSortInfo({
-      field: sorter.field || "",
-      order: sorter.order || null,
-    });
+  const handleAfterSubmit = async () => {
+    // Show table loading
+    setTableLoading(true);
+    // Small delay to show loading state
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    setTableLoading(false);
   };
 
-  // Sort data based on sortInfo
-  const sortedData = useMemo(() => {
-    let sortedPersons = [...persons];
-
-    // Default sort: newest first by ID (since ID is timestamp)
-    if (!sortInfo.field || !sortInfo.order) {
-      return sortedPersons.sort((a: Person, b: Person) =>
-        b.id.localeCompare(a.id)
-      );
-    }
-
-    return sortedPersons.sort((a: Person, b: Person) => {
-      let compareResult = 0;
-
-      switch (sortInfo.field) {
-        case "fullname":
-          const nameA = `${a.firstname} ${a.lastname}`;
-          const nameB = `${b.firstname} ${b.lastname}`;
-          compareResult = nameA.localeCompare(nameB, "th");
-          break;
-        case "gender":
-          compareResult = a.gender.localeCompare(b.gender, "th");
-          break;
-        case "phone":
-          compareResult = a.phone.localeCompare(b.phone, "th");
-          break;
-        case "nationality":
-          compareResult = a.nationality.localeCompare(b.nationality, "th");
-          break;
-        default:
-          return 0;
-      }
-
-      return sortInfo.order === "ascend" ? compareResult : -compareResult;
-    });
-  }, [persons, sortInfo]);
-
-  const paginatedData = sortedData.slice(
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
-  );
-
-  // Auto-navigate to correct page when data changes
-  useEffect(() => {
-    const totalPages = Math.ceil(sortedData.length / pagination.pageSize);
-    const currentPage = pagination.current;
-
-    // If current page is beyond total pages, go to last page
-    if (currentPage > totalPages && totalPages > 0) {
-      dispatch(
-        setPagination({
-          current: totalPages,
-          pageSize: pagination.pageSize,
-          total: sortedData.length,
-        })
-      );
-    }
-  }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
+  const handleAfterDelete = async () => {
+    // Show table loading
+    setTableLoading(true);
+    // Small delay to show loading state
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    setTableLoading(false);
+  };
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -237,7 +173,11 @@ const PersonManagement = () => {
         />
 
         {/* Person Table Section */}
-        <PersonTable onEdit={handleEdit} triggerRefresh={triggerTableRefresh} />
+        <PersonTable
+          onEdit={handleEdit}
+          externalLoading={tableLoading}
+          onAfterDelete={handleAfterDelete}
+        />
       </div>
     </div>
   );

@@ -15,11 +15,15 @@ import { useAppSelector } from "@/store/store";
 
 interface PersonTableProps {
   onEdit: (person: Person) => void;
-  onRefresh?: () => Promise<void>;
-  triggerRefresh?: boolean; // External trigger for refresh
+  externalLoading?: boolean;
+  onAfterDelete?: () => Promise<void>;
 }
 
-const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) => {
+const PersonTable = ({
+  onEdit,
+  externalLoading = false,
+  onAfterDelete,
+}: PersonTableProps) => {
   const { t } = useTranslation(["person-management", "common"]);
   const { message } = App.useApp();
   const dispatch = useDispatch();
@@ -45,36 +49,22 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
 
   // Initialize table on mount - Show initial loading to prevent UI flash
   useEffect(() => {
-    const initializeTable = async () => {
-      setIsLoading(true);
-      try {
-        // Small delay to prevent flash of content
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeTable();
+    // Set a minimal delay to prevent flash of content
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDelete = async (id: string) => {
-    setIsLoading(true);
     try {
-      // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
       dispatch(deletePerson(id));
       message.success(t("table.messages.deleteSuccess"));
 
-      // Trigger table refresh
-      if (onRefresh) {
-        await onRefresh();
+      // Trigger parent loading
+      if (onAfterDelete) {
+        await onAfterDelete();
       }
     } catch (error) {
       message.error("เกิดข้อผิดพลาดในการลบข้อมูล");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -84,11 +74,7 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
       return;
     }
 
-    setIsLoading(true);
     try {
-      // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
       selectedRowKeys.forEach((id) => {
         dispatch(deletePerson(id as string));
       });
@@ -99,14 +85,12 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
         t("table.messages.deleteSelected", { count: deletedCount }),
       );
 
-      // Trigger table refresh
-      if (onRefresh) {
-        await onRefresh();
+      // Trigger parent loading
+      if (onAfterDelete) {
+        await onAfterDelete();
       }
     } catch (error) {
       message.error("เกิดข้อผิดพลาดในการลบข้อมูลที่เลือก");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -187,7 +171,12 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
       width: 150,
       render: (_: unknown, record: Person) => (
         <Space key={`actions-${record.id}`}>
-          <Button type="primary" size="small" onClick={() => onEdit(record)}>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => onEdit(record)}
+            disabled={externalLoading}
+          >
             {t("table.actions.edit")}
           </Button>
           <Popconfirm
@@ -200,7 +189,7 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
               type="primary"
               danger
               size="small"
-              disabled={isLoading}
+              disabled={externalLoading}
             >
               {t("table.actions.delete")}
             </Button>
@@ -269,25 +258,10 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
     }
   }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
 
-  // Refresh table when triggerRefresh prop changes (from form submit)
-  useEffect(() => {
-    // Skip if not triggered
-    if (!triggerRefresh) return;
+  // Show loading when initial load or external trigger
+  const showLoading = isLoading || externalLoading;
 
-    const refreshTable = async () => {
-      setIsLoading(true);
-      try {
-        // Small delay for better UX
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    refreshTable();
-  }, [triggerRefresh]);
-
-  if (isLoading) {
+  if (showLoading) {
     return (
       <Card>
         <div
@@ -295,7 +269,9 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
           style={{ height: "400px" }}
         >
           <Spin size="large" />
-          <div className="mt-4 text-gray-600">กำลังโหลดข้อมูลตาราง...</div>
+          <div className="mt-4 text-gray-600">
+            {isLoading ? "กำลังโหลดข้อมูลตาราง..." : "กำลังอัปเดตข้อมูล..."}
+          </div>
         </div>
       </Card>
     );
@@ -312,12 +288,12 @@ const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) =>
             onConfirm={handleDeleteSelected}
             okText={t("ok", { ns: "common" })}
             cancelText={t("cancel", { ns: "common" })}
-            disabled={selectedRowKeys.length === 0 || isLoading}
+            disabled={selectedRowKeys.length === 0 || externalLoading}
           >
             <Button
               type="primary"
               danger
-              disabled={selectedRowKeys.length === 0 || isLoading}
+              disabled={selectedRowKeys.length === 0 || externalLoading}
             >
               {t("table.actions.deleteSelected", {
                 count: selectedRowKeys.length,

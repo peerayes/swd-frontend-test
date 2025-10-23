@@ -3,48 +3,53 @@
 import {
   Button,
   Card,
+  Col,
+  DatePicker,
   Form,
   Input,
-  Space,
-  Row,
-  Col,
-  Select,
-  DatePicker,
-  Radio,
   InputNumber,
+  Radio,
+  Row,
+  Select,
+  Space,
   Spin,
 } from "antd";
-import { useEffect, useMemo, useState, useRef } from "react";
 import dayjs from "dayjs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 
-import type {
-  Person,
-  RegistrationFormValues,
-  FormSubmitHandler,
-  TitleOption,
-} from "@/types/person.types";
-import { createValidationRules } from "@/types/person.types";
+import { renderSelectOptions } from "@/components/shared/SelectOption";
 import {
   countryCodeOptions,
   nationalityOptions,
 } from "@/constants/countryOptions";
-import { renderSelectOptions } from "@/components/shared/SelectOption";
 import { setEditingPerson } from "@/store/personSlice";
 import { useAppSelector } from "@/store/store";
+import type {
+  FormSubmitHandler,
+  RegistrationFormValues,
+  TitleOption,
+} from "@/types/person.types";
+import { createValidationRules } from "@/types/person.types";
 
 interface PersonFormProps {
   onSubmit: FormSubmitHandler;
   onReset: () => void;
   onCancelEdit: () => void;
-  onAfterSubmit?: () => void; // Callback to trigger table refresh
+  onAfterSubmit?: () => void;
 }
 
-const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFormProps) => {
+const PersonForm = ({
+  onSubmit,
+  onReset,
+  onCancelEdit,
+  onAfterSubmit,
+}: PersonFormProps) => {
   const { t } = useTranslation(["person-management", "common"]);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const inputRefs = useRef<any[]>([]);
 
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
@@ -58,13 +63,9 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
 
   // Initialize component on mount - Show initial loading to prevent UI flash
   useEffect(() => {
-    const initializeComponent = async () => {
-      // Small delay to prevent flash of content
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setIsLoading(false);
-    };
-
-    initializeComponent();
+    // Set a minimal delay to prevent flash of content
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   // Set form values when editingPerson changes
@@ -92,7 +93,7 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
 
   // Handle form submission with loading
   const handleSubmit: FormSubmitHandler = async (
-    values: RegistrationFormValues,
+    values: RegistrationFormValues
   ) => {
     setIsSubmitting(true);
     try {
@@ -101,7 +102,7 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
       form.resetFields();
       dispatch(setEditingPerson(null));
 
-      // Trigger table refresh after successful submit
+      // Trigger table loading
       if (onAfterSubmit) {
         onAfterSubmit();
       }
@@ -120,6 +121,19 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
     dispatch(setEditingPerson(null));
     form.resetFields();
     onCancelEdit();
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number,
+    maxLength: number
+  ) => {
+    const value = e.target.value;
+
+    // ถ้ากรอกครบ maxLength แล้ว ไปช่องถัดไป
+    if (value.length === maxLength && index < inputRefs.current.length - 1) {
+      inputRefs.current[index + 1].focus();
+    }
   };
 
   if (isLoading) {
@@ -172,7 +186,7 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
               >
                 <Select<TitleOption["value"]>
                   placeholder={t(
-                    "person-management:form.fields.title.placeholder",
+                    "person-management:form.fields.title.placeholder"
                   )}
                 >
                   <Select.Option value="นาย">
@@ -266,8 +280,13 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
                     rules={validationRules.citizenId1}
                   >
                     <Input
+                      ref={(el) => {
+                        inputRefs.current[0] = el;
+                      }}
                       style={{ width: "40px", textAlign: "center" }}
                       maxLength={1}
+                      onChange={(e) => handleInputChange(e, 0, 1)}
+                      placeholder="X"
                     />
                   </Form.Item>
                   <span style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -275,8 +294,13 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
                   </span>
                   <Form.Item<RegistrationFormValues> name="citizenId2" noStyle>
                     <Input
+                      ref={(el) => {
+                        inputRefs.current[1] = el;
+                      }}
                       style={{ width: "80px", textAlign: "center" }}
                       maxLength={4}
+                      onChange={(e) => handleInputChange(e, 1, 4)}
+                      placeholder="XXXX"
                     />
                   </Form.Item>
                   <span style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -284,8 +308,13 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
                   </span>
                   <Form.Item<RegistrationFormValues> name="citizenId3" noStyle>
                     <Input
+                      ref={(el) => {
+                        inputRefs.current[2] = el;
+                      }}
                       style={{ width: "100px", textAlign: "center" }}
                       maxLength={5}
+                      onChange={(e) => handleInputChange(e, 2, 5)}
+                      placeholder="XXXXX"
                     />
                   </Form.Item>
                   <span style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -293,8 +322,13 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
                   </span>
                   <Form.Item<RegistrationFormValues> name="citizenId4" noStyle>
                     <Input
+                      ref={(el) => {
+                        inputRefs.current[3] = el;
+                      }}
                       style={{ width: "50px", textAlign: "center" }}
                       maxLength={2}
+                      onChange={(e) => handleInputChange(e, 3, 2)}
+                      placeholder="XX"
                     />
                   </Form.Item>
                   <span style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -302,8 +336,13 @@ const PersonForm = ({ onSubmit, onReset, onCancelEdit, onAfterSubmit }: PersonFo
                   </span>
                   <Form.Item<RegistrationFormValues> name="citizenId5" noStyle>
                     <Input
+                      ref={(el) => {
+                        inputRefs.current[4] = el;
+                      }}
                       style={{ width: "40px", textAlign: "center" }}
                       maxLength={1}
+                      onChange={(e) => handleInputChange(e, 4, 1)}
+                      placeholder="X"
                     />
                   </Form.Item>
                 </div>
