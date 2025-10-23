@@ -78,7 +78,9 @@
     },
     "buttons": {
       "submit": "Submit",
-      "reset": "Reset"
+      "reset": "Reset",
+      "update": "Update Data",
+      "cancelEdit": "Cancel Edit"
     },
     "validation": {
       "required": {

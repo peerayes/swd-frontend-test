@@ -46,3 +46,13 @@ body {
     /* Debug: Show if custom fonts are working */
     font-family: var(--font-geist), system-ui, sans-serif;
 }
+
+/* PersonTable - Recently Updated Row Highlight */
+.recently-updated-row {
+    background-color: #fff5f5 !important;
+    transition: background-color 0.3s ease;
+}
+
+.recently-updated-row:hover {
+    background-color: #ffe5e5 !important;
+}

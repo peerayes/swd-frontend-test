@@ -12,6 +12,7 @@ import {
 } from "@/store/personSlice";
 import { useAppSelector } from "@/store/store";
 import type { Person } from "@/types/person.types";
+import { nationalityOptions } from "@/constants/countryOptions";
 
 interface PersonTableProps {
   onEdit: (person: Person) => void;
@@ -30,6 +31,29 @@ const PersonTable = ({
   const { message } = App.useApp();
   const dispatch = useDispatch();
 
+  // Helper function to get translated nationality name
+  const getNationalityLabel = (nationalityCode: string) => {
+    // Handle legacy data format ("thai", "other")
+    if (nationalityCode === "thai") {
+      return t("form.fields.nationality.options.thai");
+    }
+    if (nationalityCode === "other") {
+      return t("form.fields.nationality.options.other");
+    }
+
+    // Handle new format (ISO country codes: "TH", "US", etc.)
+    const countryOption = nationalityOptions.find(
+      (option) => option.value === nationalityCode
+    );
+
+    if (countryOption) {
+      return t(countryOption.translationKey);
+    }
+
+    // Fallback: return the code itself
+    return nationalityCode;
+  };
+
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,11 +69,10 @@ const PersonTable = ({
   // Redux state
   const persons = useAppSelector((state) => state.persons.persons) as Person[];
   const selectedRowKeys = useAppSelector(
-    (state) => state.persons.selectedRowKeys,
+    (state) => state.persons.selectedRowKeys
   );
   const pagination = useAppSelector((state) => state.persons.pagination);
 
-  // Initialize table on mount - Show initial loading to prevent UI flash
   useEffect(() => {
     // Set a minimal delay to prevent flash of content
     const timer = setTimeout(() => setIsLoading(false), 300);
@@ -60,7 +83,6 @@ const PersonTable = ({
     try {
       dispatch(deletePerson(id));
       message.success(t("table.messages.deleteSuccess"));
-
       // Trigger parent loading
       if (onAfterDelete) {
         await onAfterDelete();
@@ -84,7 +106,7 @@ const PersonTable = ({
       dispatch(setSelectedRowKeys([]));
 
       message.success(
-        t("table.messages.deleteSelected", { count: deletedCount }),
+        t("table.messages.deleteSelected", { count: deletedCount })
       );
 
       // Trigger parent loading
@@ -98,7 +120,7 @@ const PersonTable = ({
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     dispatch(
-      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString())),
+      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString()))
     );
   };
 
@@ -138,8 +160,8 @@ const PersonTable = ({
           {gender === "male"
             ? t("form.fields.gender.options.male")
             : gender === "female"
-              ? t("form.fields.gender.options.female")
-              : t("form.fields.gender.options.unsex")}
+            ? t("form.fields.gender.options.female")
+            : t("form.fields.gender.options.unsex")}
         </span>
       ),
     },
@@ -159,13 +181,7 @@ const PersonTable = ({
       sorter: (a: Person, b: Person) =>
         a.nationality.localeCompare(b.nationality, "th"),
       sortOrder: sortInfo.field === "nationality" ? sortInfo.order : null,
-      render: (nationality: string) => (
-        <span style={{ textTransform: "capitalize" }}>
-          {nationality === "thai"
-            ? t("form.fields.nationality.options.thai")
-            : nationality}
-        </span>
-      ),
+      render: (nationality: string) => getNationalityLabel(nationality),
     },
     {
       title: t("table.columns.actions"),
@@ -208,7 +224,7 @@ const PersonTable = ({
     // Default sort: newest first by ID (since ID is timestamp)
     if (!sortInfo.field || !sortInfo.order) {
       return sortedPersons.sort((a: Person, b: Person) =>
-        b.id.localeCompare(a.id),
+        b.id.localeCompare(a.id)
       );
     }
 
@@ -240,7 +256,7 @@ const PersonTable = ({
 
   const paginatedData = sortedData.slice(
     (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize,
+    pagination.current * pagination.pageSize
   );
 
   // Auto-navigate to correct page when data changes
@@ -255,7 +271,7 @@ const PersonTable = ({
           current: totalPages,
           pageSize: pagination.pageSize,
           total: sortedData.length,
-        }),
+        })
       );
     }
   }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
@@ -281,15 +297,6 @@ const PersonTable = ({
 
   return (
     <Card>
-      <style>{`
-        .recently-updated-row {
-          background-color: #fff5f5 !important;
-          transition: background-color 0.3s ease;
-        }
-        .recently-updated-row:hover {
-          background-color: #fff5f5 !important;
-        }
-      `}</style>
       <div style={{ marginBottom: 16 }}>
         <Space>
           <Popconfirm
@@ -335,7 +342,7 @@ const PersonTable = ({
                 current: paginationInfo.current,
                 pageSize: paginationInfo.pageSize,
                 total: sortedData.length,
-              }),
+              })
             );
           }}
           scroll={{
@@ -359,7 +366,7 @@ const PersonTable = ({
                   current: current,
                   pageSize: size,
                   total: sortedData.length,
-                }),
+                })
               );
             },
           }}

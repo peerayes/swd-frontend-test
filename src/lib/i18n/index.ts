@@ -3,15 +3,15 @@ import { initReactI18next } from "react-i18next";
 
 // Import JSON files directly
 import enCommon from "@/locales/en/common.json";
-import enHome from "@/locales/en/home.json";
 import enDesignSystem from "@/locales/en/design-system.json";
-import enNav from "@/locales/en/nav.json";
 import enPersonManagement from "@/locales/en/form.json";
+import enHome from "@/locales/en/home.json";
+import enNav from "@/locales/en/nav.json";
 import thCommon from "@/locales/th/common.json";
-import thHome from "@/locales/th/home.json";
 import thDesignSystem from "@/locales/th/design-system.json";
-import thNav from "@/locales/th/nav.json";
 import thPersonManagement from "@/locales/th/form.json";
+import thHome from "@/locales/th/home.json";
+import thNav from "@/locales/th/nav.json";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -32,7 +32,7 @@ i18n.use(initReactI18next).init({
   },
   lng: "en", // Always start with English to avoid hydration mismatch
   fallbackLng: "en",
-  debug: process.env.NODE_ENV === "development",
+  // debug: process.env.NODE_ENV === "development",
   defaultNS: "common",
   fallbackNS: ["common", "home"],
 
@@ -64,8 +64,8 @@ export const initializeLanguage = () => {
       savedLanguage && ["en", "th"].includes(savedLanguage)
         ? savedLanguage
         : browserLanguage.startsWith("th")
-          ? "th"
-          : "en";
+        ? "th"
+        : "en";
 
     if (detectedLanguage !== "en") {
       i18n.changeLanguage(detectedLanguage);

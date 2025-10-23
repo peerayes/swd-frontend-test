@@ -78,7 +78,9 @@
     },
     "buttons": {
       "submit": "ส่งข้อมูล",
-      "reset": "รีเซ็ต"
+      "reset": "รีเซ็ต",
+      "update": "อัปเดตข้อมูล",
+      "cancelEdit": "ยกเลิกการแก้ไข"
     },
     "validation": {
       "required": {

@@ -56,19 +56,17 @@ const PersonForm = ({
   // Redux state
   const editingPerson = useAppSelector((state) => state.persons.editingPerson);
 
-  // Dynamic validation rules with i18n - recreate on language change
+  // Dynamic validation rules with i18n
   const validationRules = useMemo(() => createValidationRules(t), [t]);
 
-  // Initialize component on mount - Show initial loading to prevent UI flash
+  // Initialize component on mount
   useEffect(() => {
     // Set a minimal delay to prevent flash of content
     const timer = setTimeout(() => setIsLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
-
-  // Re-validate form when language changes to update error messages (only after loading completes)
+  // Re-validate fields with errors on language change or loading state change
   useEffect(() => {
-    // Don't run if still loading (Form not rendered yet)
     if (isLoading) return;
 
     // Get currently touched fields (fields that have errors)
@@ -118,6 +116,9 @@ const PersonForm = ({
   ) => {
     setIsSubmitting(true);
     try {
+      // Add 2-3 seconds delay to simulate loading
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
       await onSubmit(values);
       // Reset form after successful submission
       form.resetFields();
@@ -152,7 +153,7 @@ const PersonForm = ({
   ) => {
     const value = e.target.value;
 
-    // ถ้ากรอกครบ maxLength แล้ว ไปช่องถัดไป
+    // Move focus to next input if max length is reached
     if (value.length === maxLength && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus();
     }
@@ -425,11 +426,13 @@ const PersonForm = ({
                     htmlType="submit"
                     loading={isSubmitting}
                   >
-                    {editingPerson ? "อัปเดตข้อมูล" : t("form.buttons.submit")}
+                    {editingPerson
+                      ? t("form.buttons.update")
+                      : t("form.buttons.submit")}
                   </Button>
                   {editingPerson && (
-                    <Button onClick={handleCancelEdit} loading={isSubmitting}>
-                      ยกเลิกการแก้ไข
+                    <Button onClick={handleCancelEdit} disabled={isSubmitting}>
+                      {t("form.buttons.cancelEdit")}
                     </Button>
                   )}
                   <Button htmlType="reset" disabled={isSubmitting}>

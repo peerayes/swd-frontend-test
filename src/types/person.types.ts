@@ -1,4 +1,3 @@
-// Person Registration Form Types
 import dayjs, { Dayjs } from "dayjs";
 
 export interface Person {
@@ -23,36 +22,22 @@ export interface Person {
 }
 
 export interface RegistrationFormValues {
-  // Row 1: Personal Information
   title: "นาย" | "นาง" | "นางสาว";
   firstname: string;
   lastname: string;
-
-  // Row 2: Birth and Nationality
   birthday: Dayjs | null; // Dayjs object for form
   nationality: string;
-
-  // Row 3: Citizen ID (13 digits split into parts)
-  citizenId1: string; // 1 digit
-  citizenId2: string; // 4 digits
-  citizenId3: string; // 5 digits
-  citizenId4: string; // 2 digits
-  citizenId5: string; // 1 digit
-
-  // Row 4: Gender
+  citizenId1: string;
+  citizenId2: string;
+  citizenId3: string;
+  citizenId4: string;
+  citizenId5: string;
   gender: "male" | "female" | "unsex";
-
-  // Row 5: Mobile Phone
-  countryCode: string; // e.g., "+66", "+1", "+44"
+  countryCode: string;
   mobilePhone: string;
-
-  // Row 6: Passport
-  passportNo?: string; // Optional field
-
-  // Row 7: Expected Salary
+  passportNo?: string;
   expectedSalary: number;
 }
-
 // Helper type for form field validation rules - compatible with Ant Design Rule
 export interface FormFieldRule {
   required?: boolean;
@@ -298,13 +283,12 @@ export type CountryCodeOption = {
   label: string;
 };
 
-// Citizen ID helper type
 export interface CitizenIdParts {
-  part1: string; // 1 digit
-  part2: string; // 4 digits
-  part3: string; // 5 digits
-  part4: string; // 2 digits
-  part5: string; // 1 digit
+  part1: string;
+  part2: string;
+  part3: string;
+  part4: string;
+  part5: string;
 }
 
 // Utility functions for form validation
@@ -322,7 +306,6 @@ export const citizenIdValidation = {
   },
 };
 
-// Default form values
 export const DEFAULT_FORM_VALUES: Partial<RegistrationFormValues> = {
   title: "นาย",
   nationality: "thai",
