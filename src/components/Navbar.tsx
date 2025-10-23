@@ -46,7 +46,11 @@ export default function Navbar() {
           </Link>
 
           {/* Navigation Links */}
-          <Space size="large" style={{ flex: 1, justifyContent: "center" }}>
+          <Space
+            size="large"
+            style={{ flex: 1, justifyContent: "center" }}
+            className="hidden md:flex"
+          >
             <Link
               href="/move-shape"
               className={`

@@ -7,16 +7,14 @@ import styles from "./move-shape.module.scss";
 
 const { Title } = Typography;
 
-type Shape =
-  | "square"
-  | "circle"
-  | "ellipse"
-  | "trapezoid"
-  | "rectangle"
-  | "parallelogram";
-
 interface ShapePosition {
-  shape: Shape;
+  shape:
+    | "square"
+    | "circle"
+    | "ellipse"
+    | "trapezoid"
+    | "rectangle"
+    | "parallelogram";
   position: number; // 0, 1, 2, 3, 4, 5 for continuous pipeline
   row: "top" | "bottom";
 }
@@ -44,7 +42,6 @@ export default function MoveShape() {
   const [board, setBoard] = useState<AnimatedBoard>(initialBoard);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationClass, setAnimationClass] = useState<string>("");
-  const [isShuffling, setIsShuffling] = useState(false);
 
   // Convert board to continuous array and back
   const boardToContinuous = (board: AnimatedBoard): ShapePosition[] => {
@@ -68,6 +65,19 @@ export default function MoveShape() {
     };
   };
 
+  // Animation helper to reduce code duplication
+  const animateMove = (animationClass: string, logic: () => void) => {
+    setIsAnimating(true);
+    setAnimationClass(animationClass);
+    setTimeout(() => {
+      logic();
+      setTimeout(() => {
+        setIsAnimating(false);
+        setAnimationClass("");
+      }, 100);
+    }, 400);
+  };
+
   // Shift continuous array
   const shiftContinuous = (
     arr: ShapePosition[],
@@ -85,78 +95,67 @@ export default function MoveShape() {
     });
   };
 
+  // Logic for swapping rows
+  const moveVerticalLogic = (direction: "up" | "down") => {
+    setBoard((prev) => {
+      // Get current shapes from each row
+      const row1Shapes = prev.row1.map((item) => item.shape);
+      const row2Shapes = prev.row2.map((item) => item.shape);
+
+      // Create continuous array with swapped shapes
+      const swappedContinuous = [
+        ...row2Shapes.map((shape, index) => ({
+          shape,
+          position: index,
+          row: "top" as const,
+        })),
+        ...row1Shapes.map((shape, index) => ({
+          shape,
+          position: index + 3,
+          row: "bottom" as const,
+        })),
+      ];
+
+      return continuousToBoard(swappedContinuous);
+    });
+  };
+
   // swap rows with continuous pipeline
   const moveVertical = (direction: "up" | "down") => {
-    setIsAnimating(true);
-    setAnimationClass(direction === "up" ? styles.slideUp : styles.slideDown);
-
-    setTimeout(() => {
-      setBoard((prev) => {
-        // Get current shapes from each row
-        const row1Shapes = prev.row1.map((item) => item.shape);
-        const row2Shapes = prev.row2.map((item) => item.shape);
-
-        // Create new board with swapped shapes but correct positions
-        const newBoard: AnimatedBoard = {
-          row1: [
-            { shape: row2Shapes[0], position: 0, row: "top" as const },
-            { shape: row2Shapes[1], position: 1, row: "top" as const },
-            { shape: row2Shapes[2], position: 2, row: "top" as const },
-          ],
-          row2: [
-            { shape: row1Shapes[0], position: 3, row: "bottom" as const },
-            { shape: row1Shapes[1], position: 4, row: "bottom" as const },
-            { shape: row1Shapes[2], position: 5, row: "bottom" as const },
-          ],
-        };
-
-        return newBoard;
-      });
-
-      setTimeout(() => {
-        setIsAnimating(false);
-        setAnimationClass("");
-      }, 100);
-    }, 400);
+    animateMove(direction === "up" ? styles.slideUp : styles.slideDown, () =>
+      moveVerticalLogic(direction),
+    );
   };
 
   // continuous pipeline
   const moveHorizontal = (direction: "left" | "right") => {
-    setIsAnimating(true);
-    setAnimationClass(
+    animateMove(
       direction === "left" ? styles.slideLeft : styles.slideRight,
+      () => {
+        setBoard((prev) => {
+          const continuous = boardToContinuous(prev);
+          const shiftedContinuous = shiftContinuous(continuous, direction);
+          return continuousToBoard(shiftedContinuous);
+        });
+      },
     );
+  };
 
-    setTimeout(() => {
-      setBoard((prev) => {
-        const continuous = boardToContinuous(prev);
-        const shiftedContinuous = shiftContinuous(continuous, direction);
-        return continuousToBoard(shiftedContinuous);
-      });
-
-      setTimeout(() => {
-        setIsAnimating(false);
-        setAnimationClass("");
-      }, 100);
-    }, 400);
+  // Direction mapper to replace switch statement
+  const directionHandlers = {
+    up: () => moveVertical("up"),
+    down: () => moveVertical("down"),
+    left: () => moveHorizontal("left"),
+    right: () => moveHorizontal("right"),
   };
 
   const moveShape = (direction: string) => {
     if (isAnimating) return; // Prevent multiple clicks during animation
 
-    switch (direction) {
-      case "up":
-        moveVertical("up");
-        break;
-      case "down":
-        moveVertical("down");
-        break;
-      case "left":
-        moveHorizontal("left");
-        break;
-      case "right":
-        moveHorizontal("right");
-        break;
+    const handler =
+      directionHandlers[direction as keyof typeof directionHandlers];
+    if (handler) {
+      handler();
     }
   };
 
