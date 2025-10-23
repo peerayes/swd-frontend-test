@@ -1,0 +1,358 @@
+"use client";
+
+import { Button, Space, Table, Popconfirm, Card, App, Spin } from "antd";
+import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import type { Person } from "@/types/person.types";
+import {
+  deletePerson,
+  setSelectedRowKeys,
+  setPagination,
+} from "@/store/personSlice";
+import { useAppSelector } from "@/store/store";
+
+interface PersonTableProps {
+  onEdit: (person: Person) => void;
+  onRefresh?: () => Promise<void>;
+  triggerRefresh?: boolean; // External trigger for refresh
+}
+
+const PersonTable = ({ onEdit, onRefresh, triggerRefresh }: PersonTableProps) => {
+  const { t } = useTranslation(["person-management", "common"]);
+  const { message } = App.useApp();
+  const dispatch = useDispatch();
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Sort state
+  const [sortInfo, setSortInfo] = useState<{
+    field: string;
+    order: "ascend" | "descend" | null;
+  }>({
+    field: "",
+    order: null,
+  });
+
+  // Redux state
+  const persons = useAppSelector((state) => state.persons.persons) as Person[];
+  const selectedRowKeys = useAppSelector(
+    (state) => state.persons.selectedRowKeys,
+  );
+  const pagination = useAppSelector((state) => state.persons.pagination);
+
+  // Initialize table on mount - Show initial loading to prevent UI flash
+  useEffect(() => {
+    const initializeTable = async () => {
+      setIsLoading(true);
+      try {
+        // Small delay to prevent flash of content
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeTable();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    setIsLoading(true);
+    try {
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      dispatch(deletePerson(id));
+      message.success(t("table.messages.deleteSuccess"));
+
+      // Trigger table refresh
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (error) {
+      message.error("เกิดข้อผิดพลาดในการลบข้อมูล");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning(t("table.messages.noSelection"));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      selectedRowKeys.forEach((id) => {
+        dispatch(deletePerson(id as string));
+      });
+      const deletedCount = selectedRowKeys.length;
+      dispatch(setSelectedRowKeys([]));
+
+      message.success(
+        t("table.messages.deleteSelected", { count: deletedCount }),
+      );
+
+      // Trigger table refresh
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (error) {
+      message.error("เกิดข้อผิดพลาดในการลบข้อมูลที่เลือก");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    dispatch(
+      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString())),
+    );
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+
+  const columns = [
+    {
+      title: t("table.columns.name"),
+      key: "fullname",
+      width: 200,
+      sorter: (a: Person, b: Person) => {
+        const nameA = `${a.firstname} ${a.lastname}`;
+        const nameB = `${b.firstname} ${b.lastname}`;
+        return nameA.localeCompare(nameB, "th");
+      },
+      sortOrder: sortInfo.field === "fullname" ? sortInfo.order : null,
+      render: (name: string, record: Person) => (
+        <div>
+          <div className="font-medium">
+            {record.firstname} {record.lastname}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: t("table.columns.gender"),
+      dataIndex: "gender",
+      key: "gender",
+      width: 100,
+      sorter: (a: Person, b: Person) => a.gender.localeCompare(b.gender, "th"),
+      sortOrder: sortInfo.field === "gender" ? sortInfo.order : null,
+      render: (gender: string) => (
+        <span style={{ textTransform: "capitalize" }}>
+          {gender === "male"
+            ? t("form.fields.gender.options.male")
+            : gender === "female"
+              ? t("form.fields.gender.options.female")
+              : t("form.fields.gender.options.unsex")}
+        </span>
+      ),
+    },
+    {
+      title: t("table.columns.phone"),
+      dataIndex: "phone",
+      key: "phone",
+      width: 150,
+      sorter: (a: Person, b: Person) => a.phone.localeCompare(b.phone, "th"),
+      sortOrder: sortInfo.field === "phone" ? sortInfo.order : null,
+    },
+    {
+      title: t("table.columns.nationality"),
+      dataIndex: "nationality",
+      key: "nationality",
+      width: 120,
+      sorter: (a: Person, b: Person) =>
+        a.nationality.localeCompare(b.nationality, "th"),
+      sortOrder: sortInfo.field === "nationality" ? sortInfo.order : null,
+      render: (nationality: string) => (
+        <span style={{ textTransform: "capitalize" }}>
+          {nationality === "thai"
+            ? t("form.fields.nationality.options.thai")
+            : nationality}
+        </span>
+      ),
+    },
+    {
+      title: t("table.columns.actions"),
+      key: "actions",
+      width: 150,
+      render: (_: unknown, record: Person) => (
+        <Space key={`actions-${record.id}`}>
+          <Button type="primary" size="small" onClick={() => onEdit(record)}>
+            {t("table.actions.edit")}
+          </Button>
+          <Popconfirm
+            title={t("table.confirm.delete.title")}
+            onConfirm={() => handleDelete(record.id)}
+            okText={t("ok", { ns: "common" })}
+            cancelText={t("cancel", { ns: "common" })}
+          >
+            <Button
+              type="primary"
+              danger
+              size="small"
+              disabled={isLoading}
+            >
+              {t("table.actions.delete")}
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  // Sort data based on sortInfo
+  const sortedData = useMemo(() => {
+    let sortedPersons = [...persons];
+
+    // Default sort: newest first by ID (since ID is timestamp)
+    if (!sortInfo.field || !sortInfo.order) {
+      return sortedPersons.sort((a: Person, b: Person) =>
+        b.id.localeCompare(a.id),
+      );
+    }
+
+    return sortedPersons.sort((a: Person, b: Person) => {
+      let compareResult = 0;
+
+      switch (sortInfo.field) {
+        case "fullname":
+          const nameA = `${a.firstname} ${a.lastname}`;
+          const nameB = `${b.firstname} ${b.lastname}`;
+          compareResult = nameA.localeCompare(nameB, "th");
+          break;
+        case "gender":
+          compareResult = a.gender.localeCompare(b.gender, "th");
+          break;
+        case "phone":
+          compareResult = a.phone.localeCompare(b.phone, "th");
+          break;
+        case "nationality":
+          compareResult = a.nationality.localeCompare(b.nationality, "th");
+          break;
+        default:
+          return 0;
+      }
+
+      return sortInfo.order === "ascend" ? compareResult : -compareResult;
+    });
+  }, [persons, sortInfo]);
+
+  const paginatedData = sortedData.slice(
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.current * pagination.pageSize,
+  );
+
+  // Auto-navigate to correct page when data changes
+  useEffect(() => {
+    const totalPages = Math.ceil(sortedData.length / pagination.pageSize);
+    const currentPage = pagination.current;
+
+    // If current page is beyond total pages, go to last page
+    if (currentPage > totalPages && totalPages > 0) {
+      dispatch(
+        setPagination({
+          current: totalPages,
+          pageSize: pagination.pageSize,
+          total: sortedData.length,
+        }),
+      );
+    }
+  }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
+
+  // Refresh table when triggerRefresh prop changes (from form submit)
+  useEffect(() => {
+    // Skip if not triggered
+    if (!triggerRefresh) return;
+
+    const refreshTable = async () => {
+      setIsLoading(true);
+      try {
+        // Small delay for better UX
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    refreshTable();
+  }, [triggerRefresh]);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <div
+          className="flex flex-col justify-center items-center"
+          style={{ height: "400px" }}
+        >
+          <Spin size="large" />
+          <div className="mt-4 text-gray-600">กำลังโหลดข้อมูลตาราง...</div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <div style={{ marginBottom: 16 }}>
+        <Space>
+          <Popconfirm
+            title={t("table.confirm.deleteSelected.title", {
+              count: selectedRowKeys.length,
+            })}
+            onConfirm={handleDeleteSelected}
+            okText={t("ok", { ns: "common" })}
+            cancelText={t("cancel", { ns: "common" })}
+            disabled={selectedRowKeys.length === 0 || isLoading}
+          >
+            <Button
+              type="primary"
+              danger
+              disabled={selectedRowKeys.length === 0 || isLoading}
+            >
+              {t("table.actions.deleteSelected", {
+                count: selectedRowKeys.length,
+              })}
+            </Button>
+          </Popconfirm>
+        </Space>
+      </div>
+      <Table
+        dataSource={paginatedData}
+        columns={columns}
+        rowKey="id"
+        rowSelection={rowSelection}
+        onChange={(pagination, filters, sorter) => {
+          const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
+          setSortInfo({
+            field: (sorterInfo.field as string) || "",
+            order: sorterInfo.order as "ascend" | "descend" | null,
+          });
+        }}
+        pagination={{
+          current: pagination.current,
+          pageSize: 5,
+          total: sortedData.length,
+          showSizeChanger: false,
+          showTotal: (total: number, range: [number, number]) =>
+            t("table.pagination.total", {
+              start: range[0],
+              end: range[1],
+              total,
+            }),
+        }}
+      />
+    </Card>
+  );
+};
+
+export default PersonTable;
