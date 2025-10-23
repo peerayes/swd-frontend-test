@@ -44,6 +44,7 @@ export default function MoveShape() {
   const [board, setBoard] = useState<AnimatedBoard>(initialBoard);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationClass, setAnimationClass] = useState<string>("");
+  const [isShuffling, setIsShuffling] = useState(false);
 
   // Convert board to continuous array and back
   const boardToContinuous = (board: AnimatedBoard): ShapePosition[] => {
@@ -159,6 +160,36 @@ export default function MoveShape() {
     }
   };
 
+  // Shuffle array function for randomizing all shapes
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Handle shape click for shuffling all shapes
+  const handleShapeClick = (shapePosition: ShapePosition) => {
+    console.log(
+      "Shape clicked:",
+      shapePosition.shape,
+      "at position:",
+      shapePosition.position,
+      "row:",
+      shapePosition.row,
+    );
+
+    // Shuffle all shapes immediately - no animation blocking
+    const allShapes = [...board.row1, ...board.row2];
+    const shuffledShapes = shuffleArray(allShapes);
+    const newBoard = continuousToBoard(shuffledShapes);
+
+    // Update board instantly
+    setBoard(newBoard);
+  };
+
   const renderShape = (shapePosition: ShapePosition, key: string) => {
     const { shape, position } = shapePosition;
     const positionClass = styles[`position-${position}`];
@@ -170,22 +201,10 @@ export default function MoveShape() {
         key={key}
         className={`${styles.shape} ${styles[shape]} ${positionClass} ${rowClass} ${
           isAnimating ? animationClass : ""
-        }`}
+        } ${styles.clickable}`}
+        onClick={() => handleShapeClick(shapePosition)}
       />
     );
-  };
-
-  const resetBoard = () => {
-    setIsAnimating(true);
-    setAnimationClass(styles.animating);
-
-    setTimeout(() => {
-      setBoard(initialBoard);
-      setTimeout(() => {
-        setIsAnimating(false);
-        setAnimationClass("");
-      }, 300);
-    }, 100);
   };
 
   return (
