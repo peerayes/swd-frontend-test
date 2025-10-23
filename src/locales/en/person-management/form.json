@@ -90,7 +90,8 @@
         "gender": "Please select gender!",
         "countryCode": "Please select country code!",
         "mobilePhone": "Please input mobile phone!",
-        "expectedSalary": "Please input expected salary!"
+        "expectedSalary": "Please input expected salary!",
+        "passportNo": "Passport number must be 6-9 alphanumeric characters"
       },
       "format": {
         "firstname": {
@@ -125,7 +126,8 @@
     },
     "actions": {
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "deleteSelected": "Delete Selected ({{count}})"
     },
     "confirm": {
       "delete": {
@@ -133,12 +135,25 @@
         "content": "This action cannot be undone.",
         "okText": "Delete",
         "cancelText": "Cancel"
+      },
+      "deleteSelected": {
+        "title": "Are you sure you want to delete {{count}} selected items?"
       }
     },
     "messages": {
       "deleteSuccess": "Person deleted successfully",
       "updateSuccess": "Person updated successfully",
-      "addSuccess": "Person added successfully"
+      "updateSuccessTitle": "Person Updated Successfully",
+      "addSuccess": "Person added successfully",
+      "editModeTitle": "Edit Mode",
+      "editModeDescription": "Editing {{name}}",
+      "cancelEditTitle": "Cancel Edit",
+      "cancelEditDescription": "Back to add new person mode",
+      "deleteSelected": "Successfully deleted {{count}} selected items",
+      "noSelection": "Please select items to delete"
+    },
+    "pagination": {
+      "total": "{{start}}-{{end}} of {{total}} items"
     }
   }
 }

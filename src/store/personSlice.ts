@@ -18,7 +18,7 @@ const initialState: PersonState = {
   selectedRowKeys: [],
   pagination: {
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   },
 };

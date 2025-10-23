@@ -89,57 +89,57 @@ export const createValidationRules = (
   title: [
     {
       required: true,
-      message: t("person-management:form.validation.required.title"),
+      message: t("form.validation.required.title"),
     },
   ],
   firstname: [
     {
       required: true,
-      message: t("person-management:form.validation.required.firstname"),
+      message: t("form.validation.required.firstname"),
     },
     {
       min: 2,
-      message: t("person-management:form.validation.format.firstname.min"),
+      message: t("form.validation.format.firstname.min"),
     },
     {
       pattern: /^[ก-๙a-zA-Z\s]+$/,
-      message: t("person-management:form.validation.format.firstname.pattern"),
+      message: t("form.validation.format.firstname.pattern"),
     },
   ],
   lastname: [
     {
       required: true,
-      message: t("person-management:form.validation.required.lastname"),
+      message: t("form.validation.required.lastname"),
     },
     {
       min: 2,
-      message: t("person-management:form.validation.format.lastname.min"),
+      message: t("form.validation.format.lastname.min"),
     },
     {
       pattern: /^[ก-๙a-zA-Z\s]+$/,
-      message: t("person-management:form.validation.format.lastname.pattern"),
+      message: t("form.validation.format.lastname.pattern"),
     },
   ],
   birthday: [
     {
       required: true,
-      message: t("person-management:form.validation.required.birthday"),
+      message: t("form.validation.required.birthday"),
     },
   ],
   nationality: [
     {
       required: true,
-      message: t("person-management:form.validation.required.nationality"),
+      message: t("form.validation.required.nationality"),
     },
   ],
   citizenId1: [
     {
       required: true,
-      message: t("person-management:form.validation.format.citizenId"),
+      message: t("form.validation.format.citizenId"),
     },
     {
       pattern: /^[0-9]$/,
-      message: t("person-management:form.validation.format.citizenId"),
+      message: t("form.validation.format.citizenId"),
     },
   ],
   citizenId2: [
@@ -169,40 +169,40 @@ export const createValidationRules = (
   gender: [
     {
       required: true,
-      message: t("person-management:form.validation.required.gender"),
+      message: t("form.validation.required.gender"),
     },
   ],
   countryCode: [
     {
       required: true,
-      message: t("person-management:form.validation.required.countryCode"),
+      message: t("form.validation.required.countryCode"),
     },
   ],
   mobilePhone: [
     {
       required: true,
-      message: t("person-management:form.validation.required.mobilePhone"),
+      message: t("form.validation.required.mobilePhone"),
     },
     {
       pattern: /^[0-9]{9,10}$/,
-      message: t("person-management:form.validation.format.mobilePhone"),
+      message: t("form.validation.format.mobilePhone"),
     },
   ],
   passportNo: [
     {
       pattern: /^[A-Z0-9]{6,9}$/,
-      message: t("person-management:form.validation.format.passportNo"),
+      message: t("form.validation.format.passportNo"),
     },
   ],
   expectedSalary: [
     {
       required: true,
-      message: t("person-management:form.validation.required.expectedSalary"),
+      message: t("form.validation.required.expectedSalary"),
     },
     {
       type: "number",
       min: 0,
-      message: t("person-management:form.validation.format.expectedSalary"),
+      message: t("form.validation.format.expectedSalary"),
     },
   ],
 });
