@@ -1,9 +1,33 @@
 {
-  "title": "ยินดีต้อนรับสู่แอปพลิเคชันของเรา",
-  "subtitle": "สร้างประสบการณ์ที่น่าทึ่งกับ Next.js และ Ant Design",
-  "description": "นี่คือเว็บแอปพลิเคชันสมัยใหม่ที่สร้างด้วยเทคโนโลยีล่าสุด",
-  "getStarted": "เริ่มต้นใช้งาน",
-  "learnMore": "เรียนรู้เพิ่มเติม",
+  "title": "Frontend React Development",
+  "hero": {
+    "frontend": {
+      "title": "1. Frontend React",
+      "subtitle": "รายละเอียดตาม Clip React",
+      "items": {
+        "typescript": "ใช้ Typescript - สร้างตัวเปลี่ยนภาษา ด้วย i18next",
+        "antd": "จัด Layout ของปุ่มด้วย Antd Design",
+        "css": "สร้างรูปทรงต่าง ๆ ของปุ่มด้วย CSS (ถ้าใช้ SCSS จะพิจารณาเป็นพิเศษ)",
+        "controls": "แต่ละปุ่มสามารถจัดการหน้าเว็บได้ดังนี้:",
+        "moveShape": "Move Shape ให้เลื่อนรูปทรงด้านล่างโดนหมุนไปทางซ้าย",
+        "movePosition": "Move Position ให้สลับ Grid Layout ขึ้นลง",
+        "randomPosition": "เมื่อคลิกที่ปุ่มรูปทรงต่าง ๆ ด้านล่างให้ทำการสุ่มตำแหน่งใหม่",
+        "colors": "สีที่ใช้:"
+      },
+      "button": "ลอง Move Shape"
+    },
+    "spa": {
+      "title": "2. SPA with Ant Design",
+      "subtitle": "เก็บข้อมูลบุคคล",
+      "items": {
+        "crud": "จัดการข้อมูลทั้ง Create, Edit และ Delete ลงบน LocalStorage (เมื่อ Refesh หน้าเว็บไซต์ข้อมูลต้องไม่หายไป)",
+        "redux": "ใช้ Redux-toolkit จัดการข้อมูลของฟอร์ม แทน useState",
+        "pagination": "ตารางต้องมี Pagination และสามารถเลือกลบตามแต่ละรายการได้",
+        "i18n": "แปลภาษา"
+      },
+      "button": "จัดการข้อมูลบุคคล"
+    }
+  },
   "fontTestSection": {
     "title": "ส่วนทดสอบฟอนต์",
     "defaultFont": "ฟอนต์ปกติ (sans-serif)",

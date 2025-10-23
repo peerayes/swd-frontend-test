@@ -17,6 +17,7 @@ import type {
   Person,
   RegistrationFormValues,
 } from "@/types/person.types";
+import { personStorage } from "@/utils/client/personStorage";
 
 import PersonForm from "@/components/person-management/PersonForm";
 import PersonTable from "@/components/person-management/PersonTable";
@@ -35,11 +36,13 @@ const PersonManagement = () => {
   const [tableLoading, setTableLoading] = useState(false);
 
   // Recently updated row ID for highlight effect
-  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(null);
+  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(
+    null,
+  );
 
   // Form handlers with type safety
   const handleFormSubmit: FormSubmitHandler = async (
-    values: RegistrationFormValues
+    values: RegistrationFormValues,
   ) => {
     console.log("Form submitted with type safety:", values);
 
@@ -102,10 +105,6 @@ const PersonManagement = () => {
 
         // Add to persons list via Redux
         dispatch(addPerson(newPerson));
-        localStorage.setItem(
-          "persons",
-          JSON.stringify([...persons, newPerson])
-        );
 
         // Reset pagination to first page when new record is added
         dispatch(
@@ -113,7 +112,7 @@ const PersonManagement = () => {
             current: 1,
             pageSize: pagination.pageSize,
             total: persons.length + 1,
-          })
+          }),
         );
 
         message.success(t("form.messages.registrationSuccess"));
@@ -152,18 +151,15 @@ const PersonManagement = () => {
 
   // Load data from localStorage on mount
   useEffect(() => {
-    const savedPersons = localStorage.getItem("persons");
-    if (savedPersons) {
-      const parsedPersons = JSON.parse(savedPersons);
-      dispatch(setPersons(parsedPersons));
+    const savedPersons = personStorage.loadPersons();
+    if (savedPersons.length > 0) {
+      dispatch(setPersons(savedPersons));
     }
   }, [dispatch]);
 
   // Save to localStorage whenever persons change
   useEffect(() => {
-    if (persons.length > 0) {
-      localStorage.setItem("persons", JSON.stringify(persons));
-    }
+    personStorage.savePersons(persons);
   }, [persons]);
 
   return (

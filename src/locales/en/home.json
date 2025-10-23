@@ -1,9 +1,33 @@
 {
-  "title": "Welcome to Our Application",
-  "subtitle": "Build amazing experiences with Next.js and Ant Design",
-  "description": "This is a modern web application built with the latest technologies.",
-  "getStarted": "Get Started",
-  "learnMore": "Learn More",
+  "title": "Frontend React Development",
+  "hero": {
+    "frontend": {
+      "title": "1. Frontend React",
+      "subtitle": "Details according to Clip React",
+      "items": {
+        "typescript": "Use Typescript - Create language switcher with i18next",
+        "antd": "Layout buttons with Ant Design",
+        "css": "Create various button shapes with CSS (SCSS will be considered special)",
+        "controls": "Each button can manage the web page as follows:",
+        "moveShape": "Move Shape to slide shapes below and rotate to the left",
+        "movePosition": "Move Position to switch Grid Layout up and down",
+        "randomPosition": "When clicking on shape buttons below, randomize new positions",
+        "colors": "Colors used:"
+      },
+      "button": "Try Move Shape"
+    },
+    "spa": {
+      "title": "2. SPA with Ant Design",
+      "subtitle": "Store person data",
+      "items": {
+        "crud": "Manage data with Create, Edit, and Delete in LocalStorage (data must not disappear when refreshing the website)",
+        "redux": "Use Redux-toolkit to manage form data instead of useState",
+        "pagination": "Table must have Pagination and can delete by individual items",
+        "i18n": "Language translation"
+      },
+      "button": "Manage Person Data"
+    }
+  },
   "fontTestSection": {
     "title": "Font Test Section",
     "defaultFont": "Default Font (sans-serif)",

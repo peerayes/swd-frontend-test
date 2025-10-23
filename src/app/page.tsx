@@ -30,40 +30,98 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-red-50 to-pink-50 py-20">
+      <div className="bg-gradient-to-r from-red-50 to-pink-50 py-8">
         <div className="max-w-6xl mx-auto px-8 text-center font-sans">
           <Title level={1} className="mb-6" style={{ color: "#E53E3E" }}>
-            {t("home:title")}
+            {t("title")}
           </Title>
 
-          <Title
-            level={3}
-            className="mb-8"
-            style={{ color: "#666", fontWeight: 400 }}
-          >
-            {t("home:subtitle")}
-          </Title>
+          {/* Feature Cards Section */}
+          <div className="max-w-6xl mx-auto px-8">
+            <div className="lg:flex lg:flex-row lg:gap-8 flex-col gap-8">
+              {/* Frontend React Card */}
+              <Card
+                className="flex-1 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                title={
+                  <div className="text-amber-500 font-bold text-xl">
+                    {t("hero.frontend.title")}
+                  </div>
+                }
+              >
+                <Paragraph className="text-gray-600 mb-4 flex items-start">
+                  {t("hero.frontend.subtitle")}
+                </Paragraph>
 
-          <Paragraph
-            className="text-lg mb-10"
-            style={{ color: "#888", maxWidth: "600px", margin: "0 auto 40px" }}
-          >
-            {t("home:description")}
-          </Paragraph>
+                <ul className="list-disc list-inside mb-4 flex flex-col gap-4 items-start">
+                  <li>{t("hero.frontend.items.typescript")}</li>
+                  <li>{t("hero.frontend.items.antd")}</li>
+                  <li>{t("hero.frontend.items.css")}</li>
+                  <li>{t("hero.frontend.items.controls")}</li>
+                  <li className="ml-6">{t("hero.frontend.items.moveShape")}</li>
+                  <li className="ml-6">
+                    {t("hero.frontend.items.movePosition")}
+                  </li>
+                  <li className="ml-6">
+                    {t("hero.frontend.items.randomPosition")}
+                  </li>
+                  <li>
+                    {t("hero.frontend.items.colors")}{" "}
+                    <span className="text-amber-500">#FFA200</span> และ{" "}
+                    <span className="text-green-500">#6EDA78</span>
+                  </li>
+                </ul>
 
-          <Space size="large">
-            <Button
-              type="primary"
-              size="large"
-              className="font-sans"
-              style={{ backgroundColor: "#E53E3E", borderColor: "#E53E3E" }}
-            >
-              {t("home:getStarted")}
-            </Button>
-            <Button size="large" className="font-sans">
-              {t("home:learnMore")}
-            </Button>
-          </Space>
+                <Button
+                  type="primary"
+                  size="large"
+                  className="w-full"
+                  style={{
+                    backgroundColor: "#FFA200",
+                    borderColor: "#FFA200",
+                  }}
+                  href="/move-shape"
+                >
+                  {t("hero.frontend.button")}
+                </Button>
+              </Card>
+
+              {/* SPA Card */}
+              <Card
+                className="flex-1 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                title={
+                  <div className="text-amber-500 font-bold text-xl">
+                    {t("hero.spa.title")}
+                  </div>
+                }
+              >
+                <Paragraph className="text-gray-600 mb-4 flex items-start">
+                  {t("hero.spa.subtitle")}
+                </Paragraph>
+
+                <ul className="list-disc list-inside mb-4 flex flex-col gap-4 items-start">
+                  <li className="w-full text-left">
+                    {t("hero.spa.items.crud")}
+                  </li>
+                  <li>{t("hero.spa.items.redux")}</li>
+                  <li>{t("hero.spa.items.pagination")}</li>
+                  <li>{t("hero.spa.items.i18n")}</li>
+                </ul>
+
+                <Button
+                  type="primary"
+                  size="large"
+                  className="w-full"
+                  style={{
+                    backgroundColor: "#FFA200",
+                    borderColor: "#FFA200",
+                  }}
+                  href="/person-management"
+                >
+                  {t("hero.spa.button")}
+                </Button>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -88,7 +146,7 @@ export default function Home() {
                     <Text strong>{t("home:fontTestSection.defaultFont")}</Text>
                   </span>
                 }
-                style={{ height: "140px" }}
+                style={{ height: "160px" }}
               >
                 <div>
                   <Text className="font-sans" style={{ color: "#666" }}>
@@ -120,7 +178,7 @@ export default function Home() {
                     </Text>
                   </span>
                 }
-                style={{ height: "140px" }}
+                style={{ height: "160px" }}
               >
                 <div>
                   <Text className="font-mono" style={{ color: "#666" }}>
@@ -150,7 +208,7 @@ export default function Home() {
                     <Text strong>{t("home:fontTestSection.systemFont")}</Text>
                   </span>
                 }
-                style={{ height: "140px" }}
+                style={{ height: "160px" }}
               >
                 <div>
                   <Text style={{ color: "#666" }}>

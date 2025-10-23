@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { Divide } from "lucide-react";
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -14,90 +15,74 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <Header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 24px",
-        backgroundColor: "#fff",
-        borderBottom: "1px solid #f0f0f0",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        height: "64px",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-      }}
-    >
-      {/* Logo/Brand */}
-      <Link
-        href="/"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          color: pathname === "/" ? "#E53E3E" : "#E53E3E",
-          textDecoration: "none",
-        }}
-      >
-        <Text strong style={{ fontSize: "18px", color: "inherit" }}>
-          SWD
-        </Text>
-      </Link>
-
-      {/* Navigation Links */}
-      <Space size="large" style={{ flex: 1, justifyContent: "center" }}>
-        <Link
-          href="/move-shape"
+    <div className="w-full bg-white shadow-xl">
+      <nav className="max-w-7xl mx-auto">
+        <Header
           style={{
-            color: pathname === "/move-shape" ? "#E53E3E" : "#666",
-            textDecoration: "none",
-            fontSize: "16px",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            transition: "all 0.3s ease",
-            backgroundColor:
-              pathname === "/move-shape" ? "#fff5f5" : "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 24px",
+            backgroundColor: "#fff",
+            height: "64px",
+            position: "sticky",
+            top: 0,
+            zIndex: 1000,
           }}
-          className="nav-link"
         >
-          Move Shape
-        </Link>
-        <Link
-          href="/person-management"
-          style={{
-            color: pathname === "/person-management" ? "#E53E3E" : "#666",
-            textDecoration: "none",
-            fontSize: "16px",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            transition: "all 0.3s ease",
-            backgroundColor:
-              pathname === "/person-management" ? "#fff5f5" : "transparent",
-          }}
-          className="nav-link"
-        >
-          {t("common:personManagement")}
-        </Link>
-      </Space>
+          {/* Logo/Brand */}
+          <Link
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              color: pathname === "/" ? "#E53E3E" : "#E53E3E",
+              textDecoration: "none",
+            }}
+          >
+            <Text strong style={{ fontSize: "18px", color: "inherit" }}>
+              SWD
+            </Text>
+          </Link>
 
-      {/* Language Switcher */}
-      <LanguageSwitcher />
-    </Header>
+          {/* Navigation Links */}
+          <Space size="large" style={{ flex: 1, justifyContent: "center" }}>
+            <Link
+              href="/move-shape"
+              className={`
+                transition-all duration-300 ease
+                px-4 py-2 rounded-lg
+                text-base
+                ${
+                  pathname === "/move-shape"
+                    ? "text-red-600 bg-red-50"
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                }
+              `}
+            >
+              Move Shape
+            </Link>
+            <Link
+              href="/person-management"
+              className={`
+                transition-all duration-300 ease
+                px-4 py-2 rounded-lg
+                text-base
+                ${
+                  pathname === "/person-management"
+                    ? "text-red-600 bg-red-50"
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                }
+              `}
+            >
+              {t("common:personManagement")}
+            </Link>
+          </Space>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+        </Header>
+      </nav>
+    </div>
   );
-
-  // Add hover effect for navigation links
-  if (typeof window !== "undefined") {
-    const style = document.createElement("style");
-    style.textContent = `
-      .nav-link:hover {
-        color: #E53E3E !important;
-        background-color: #fff5f5 !important;
-      }
-      .nav-link.active {
-        color: #E53E3E !important;
-        background-color: #fff5f5 !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
 }
