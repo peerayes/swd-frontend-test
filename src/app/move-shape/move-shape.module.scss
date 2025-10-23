@@ -260,6 +260,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .controlBtn {
@@ -274,6 +275,7 @@
   justify-content: center !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  margin: 0 8px !important;
 
   // Override Ant Design Button primary color
   &:global(.ant-btn-primary) {

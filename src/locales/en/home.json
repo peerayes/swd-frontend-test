@@ -16,6 +16,12 @@
       },
       "button": "Try Move Shape"
     },
+    "controls": {
+      "moveUp": "Move Up",
+      "moveDown": "Move Down",
+      "moveLeft": "Move Left",
+      "moveRight": "Move Right"
+    },
     "spa": {
       "title": "2. SPA with Ant Design",
       "subtitle": "Store person data",

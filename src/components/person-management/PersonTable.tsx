@@ -45,7 +45,7 @@ const PersonTable = ({
   // Redux state
   const persons = useAppSelector((state) => state.persons.persons) as Person[];
   const selectedRowKeys = useAppSelector(
-    (state) => state.persons.selectedRowKeys
+    (state) => state.persons.selectedRowKeys,
   );
   const pagination = useAppSelector((state) => state.persons.pagination);
 
@@ -84,7 +84,7 @@ const PersonTable = ({
       dispatch(setSelectedRowKeys([]));
 
       message.success(
-        t("table.messages.deleteSelected", { count: deletedCount })
+        t("table.messages.deleteSelected", { count: deletedCount }),
       );
 
       // Trigger parent loading
@@ -98,7 +98,7 @@ const PersonTable = ({
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     dispatch(
-      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString()))
+      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString())),
     );
   };
 
@@ -138,8 +138,8 @@ const PersonTable = ({
           {gender === "male"
             ? t("form.fields.gender.options.male")
             : gender === "female"
-            ? t("form.fields.gender.options.female")
-            : t("form.fields.gender.options.unsex")}
+              ? t("form.fields.gender.options.female")
+              : t("form.fields.gender.options.unsex")}
         </span>
       ),
     },
@@ -208,7 +208,7 @@ const PersonTable = ({
     // Default sort: newest first by ID (since ID is timestamp)
     if (!sortInfo.field || !sortInfo.order) {
       return sortedPersons.sort((a: Person, b: Person) =>
-        b.id.localeCompare(a.id)
+        b.id.localeCompare(a.id),
       );
     }
 
@@ -240,7 +240,7 @@ const PersonTable = ({
 
   const paginatedData = sortedData.slice(
     (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
+    pagination.current * pagination.pageSize,
   );
 
   // Auto-navigate to correct page when data changes
@@ -255,7 +255,7 @@ const PersonTable = ({
           current: totalPages,
           pageSize: pagination.pageSize,
           total: sortedData.length,
-        })
+        }),
       );
     }
   }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
@@ -321,24 +321,43 @@ const PersonTable = ({
         rowClassName={(record) =>
           record.id === recentlyUpdatedId ? "recently-updated-row" : ""
         }
-        onChange={(pagination, filters, sorter) => {
+        onChange={(paginationInfo, filters, sorter) => {
           const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
           setSortInfo({
             field: (sorterInfo.field as string) || "",
             order: sorterInfo.order as "ascend" | "descend" | null,
           });
+
+          // Dispatch pagination changes to Redux
+          dispatch(
+            setPagination({
+              current: paginationInfo.current,
+              pageSize: paginationInfo.pageSize,
+              total: sortedData.length,
+            }),
+          );
         }}
         pagination={{
           current: pagination.current,
-          pageSize: 5,
+          pageSize: pagination.pageSize,
           total: sortedData.length,
-          showSizeChanger: false,
+          showSizeChanger: true,
           showTotal: (total: number, range: [number, number]) =>
             t("table.pagination.total", {
               start: range[0],
               end: range[1],
               total,
             }),
+          pageSizeOptions: ["5", "10", "20", "50"],
+          onShowSizeChange: (current, size) => {
+            dispatch(
+              setPagination({
+                current: current,
+                pageSize: size,
+                total: sortedData.length,
+              }),
+            );
+          },
         }}
       />
     </Card>

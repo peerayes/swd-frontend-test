@@ -16,6 +16,12 @@
       },
       "button": "ลอง Move Shape"
     },
+    "controls": {
+      "moveUp": "เลื่อนขึ้น",
+      "moveDown": "เลื่อนลง",
+      "moveLeft": "ไปทางซ้าย",
+      "moveRight": "ไปทางขวา"
+    },
     "spa": {
       "title": "2. SPA with Ant Design",
       "subtitle": "เก็บข้อมูลบุคคล",

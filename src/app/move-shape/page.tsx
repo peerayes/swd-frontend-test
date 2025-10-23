@@ -84,7 +84,7 @@ export default function MoveShape() {
     });
   };
 
-  // การเคลื่อนที่แนวตั้ง (ขึ้น/ลง) - swap rows with continuous pipeline
+  // swap rows with continuous pipeline
   const moveVertical = (direction: "up" | "down") => {
     setIsAnimating(true);
     setAnimationClass(direction === "up" ? styles.slideUp : styles.slideDown);
@@ -119,7 +119,7 @@ export default function MoveShape() {
     }, 400);
   };
 
-  // การเคลื่อนที่แนวนอน (ซ้าย/ขวา) - continuous pipeline
+  // continuous pipeline
   const moveHorizontal = (direction: "left" | "right") => {
     setIsAnimating(true);
     setAnimationClass(
@@ -194,7 +194,7 @@ export default function MoveShape() {
         <Title level={2} className={`${styles.title} text-center mb-8`}>
           Move Shape
         </Title>
-
+        {/* Shape motion state */}
         <Card className={`${styles.gameArea} mb-6`}>
           <div className={styles.gameBoard}>
             <div className={styles.shapeRow}>
@@ -226,54 +226,60 @@ export default function MoveShape() {
           </div>
         </Card>
 
+        {/* Controler */}
         <Card className={`${styles.controls} mb-6`}>
           <div className={styles.controlPanel}>
-            <Space direction="vertical" size="large">
-              <Button
-                type="primary"
-                onClick={() => moveShape("up")}
-                className={`${styles.controlBtn} ${styles.upBtn}`}
-                icon={<span className={styles.arrowIcon}>↑</span>}
-                disabled={isAnimating}
-              />
-              <Space size="middle">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex flex-col items-center gap-2">
                 <Button
                   type="primary"
-                  onClick={() => moveShape("left")}
-                  className={`${styles.controlBtn} ${styles.leftBtn}`}
-                  icon={<span className={styles.arrowIcon}>←</span>}
+                  onClick={() => moveShape("up")}
+                  className={`${styles.controlBtn} ${styles.upBtn}`}
+                  icon={<span className={styles.arrowIcon}>↑</span>}
                   disabled={isAnimating}
                 />
-                <Button
-                  type="primary"
-                  onClick={() => moveShape("down")}
-                  className={`${styles.controlBtn} ${styles.downBtn}`}
-                  icon={<span className={styles.arrowIcon}>↓</span>}
-                  disabled={isAnimating}
-                />
-                <Button
-                  type="primary"
-                  onClick={() => moveShape("right")}
-                  className={`${styles.controlBtn} ${styles.rightBtn}`}
-                  icon={<span className={styles.arrowIcon}>→</span>}
-                  disabled={isAnimating}
-                />
-              </Space>
-            </Space>
-          </div>
-        </Card>
-
-        <Card className={`${styles.statusPanel}`}>
-          <div className={styles.statusInfo}>
-            <div className={styles.quickActions}>
-              <Button
-                size="small"
-                onClick={resetBoard}
-                className={styles.resetBtn}
-                disabled={isAnimating}
-              >
-                Reset Position
-              </Button>
+                <span className="text-sm font-medium text-gray-400">
+                  {t("hero.controls.moveUp")}
+                </span>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    type="primary"
+                    onClick={() => moveShape("left")}
+                    className={`${styles.controlBtn} ${styles.leftBtn}`}
+                    icon={<span className={styles.arrowIcon}>←</span>}
+                    disabled={isAnimating}
+                  />
+                  <span className="text-sm font-medium text-gray-400">
+                    {t("hero.controls.moveLeft")}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    type="primary"
+                    onClick={() => moveShape("down")}
+                    className={`${styles.controlBtn} ${styles.downBtn}`}
+                    icon={<span className={styles.arrowIcon}>↓</span>}
+                    disabled={isAnimating}
+                  />
+                  <span className="text-sm font-medium text-gray-400">
+                    {t("hero.controls.moveDown")}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    type="primary"
+                    onClick={() => moveShape("right")}
+                    className={`${styles.controlBtn} ${styles.rightBtn}`}
+                    icon={<span className={styles.arrowIcon}>→</span>}
+                    disabled={isAnimating}
+                  />
+                  <span className="text-sm font-medium text-gray-400">
+                    {t("hero.controls.moveRight")}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </Card>
