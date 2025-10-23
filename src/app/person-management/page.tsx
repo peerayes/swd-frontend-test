@@ -34,6 +34,9 @@ const PersonManagement = () => {
   // Table loading trigger
   const [tableLoading, setTableLoading] = useState(false);
 
+  // Recently updated row ID for highlight effect
+  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(null);
+
   // Form handlers with type safety
   const handleFormSubmit: FormSubmitHandler = async (
     values: RegistrationFormValues
@@ -66,6 +69,13 @@ const PersonManagement = () => {
 
         dispatch(updatePerson(updatedPerson));
         dispatch(setEditingPerson(null));
+
+        // Set highlighted row for 3 seconds
+        setRecentlyUpdatedId(updatedPerson.id);
+        setTimeout(() => {
+          setRecentlyUpdatedId(null);
+        }, 3000);
+
         message.success("อัปเดตข้อมูลสำเร็จ");
       } else {
         // Create new person
@@ -112,11 +122,6 @@ const PersonManagement = () => {
       message.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       throw error; // Re-throw to let PersonForm handle loading state
     }
-  };
-
-  const handleFormReset = () => {
-    dispatch(setEditingPerson(null));
-    message.info(t("form.messages.resetInfo"));
   };
 
   const handleCancelEdit = () => {
@@ -167,7 +172,6 @@ const PersonManagement = () => {
         {/* Person Form Section */}
         <PersonForm
           onSubmit={handleFormSubmit}
-          onReset={handleFormReset}
           onCancelEdit={handleCancelEdit}
           onAfterSubmit={handleAfterSubmit}
         />
@@ -177,6 +181,7 @@ const PersonManagement = () => {
           onEdit={handleEdit}
           externalLoading={tableLoading}
           onAfterDelete={handleAfterDelete}
+          recentlyUpdatedId={recentlyUpdatedId}
         />
       </div>
     </div>

@@ -1,12 +1,31 @@
 "use client";
 
-import { Button, Typography, Card, Space, Row, Col, Tag } from "antd";
+import { Button, Typography, Card, Space, Row, Col, Tag, Spin } from "antd";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 const { Title, Paragraph, Text } = Typography;
 
 export default function Home() {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize page with loading to prevent UI flash
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Spin size="large" />
+          <div className="mt-4 text-gray-600">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -35,14 +35,12 @@ import { createValidationRules } from "@/types/person.types";
 
 interface PersonFormProps {
   onSubmit: FormSubmitHandler;
-  onReset: () => void;
   onCancelEdit: () => void;
   onAfterSubmit?: () => void;
 }
 
 const PersonForm = ({
   onSubmit,
-  onReset,
   onCancelEdit,
   onAfterSubmit,
 }: PersonFormProps) => {
@@ -68,9 +66,32 @@ const PersonForm = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // Set form values when editingPerson changes
+  // Re-validate form when language changes to update error messages (only after loading completes)
   useEffect(() => {
-    if (editingPerson) {
+    // Don't run if still loading (Form not rendered yet)
+    if (isLoading) return;
+
+    // Get currently touched fields (fields that have errors)
+    const fieldsError = form.getFieldsError();
+    const hasErrors = fieldsError.some((field) => field.errors.length > 0);
+
+    // Only re-validate if there are existing errors
+    if (hasErrors) {
+      // Get all field names that have errors
+      const errorFields = fieldsError
+        .filter((field) => field.errors.length > 0)
+        .map((field) => field.name);
+
+      // Validate only those fields to update error messages
+      form.validateFields(errorFields).catch(() => {
+        // Ignore validation errors, we just want to update messages
+      });
+    }
+  }, [t, form, isLoading]);
+
+  // Set form values when editingPerson changes (only after loading completes)
+  useEffect(() => {
+    if (editingPerson && !isLoading) {
       form.setFieldsValue({
         title: editingPerson.title,
         firstname: editingPerson.firstname,
@@ -89,7 +110,7 @@ const PersonForm = ({
         expectedSalary: editingPerson.expectedSalary,
       });
     }
-  }, [editingPerson, form]);
+  }, [editingPerson, isLoading, form]);
 
   // Handle form submission with loading
   const handleSubmit: FormSubmitHandler = async (
@@ -114,7 +135,8 @@ const PersonForm = ({
   };
 
   const handleFormReset = () => {
-    onReset();
+    // Clear all form fields but stay in edit mode (don't clear editingPerson)
+    form.resetFields();
   };
 
   const handleCancelEdit = () => {
@@ -172,9 +194,6 @@ const PersonForm = ({
           layout="vertical"
           onFinish={handleSubmit}
           onReset={handleFormReset}
-          initialValues={{
-            expectedSalary: 0,
-          }}
         >
           {/* Row 1: Title, Firstname, Lastname, Gender */}
           <Row gutter={16} style={{ marginBottom: 16 }}>

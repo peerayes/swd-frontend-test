@@ -103,9 +103,9 @@
           "pattern": "Lastname must contain only letters!"
         },
         "citizenId": "Please enter numbers only",
-        "mobilePhone": "Please enter valid phone number!",
-        "passportNo": "Please enter valid passport number!",
-        "expectedSalary": "Salary must be positive!"
+        "mobilePhone": "Mobile phone must be 9-10 digits!",
+        "passportNo": "Passport number must be 6-9 alphanumeric characters!",
+        "expectedSalary": "Expected salary must be greater than or equal to 0!"
       }
     },
     "messages": {

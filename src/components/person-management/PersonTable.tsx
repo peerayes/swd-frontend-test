@@ -1,28 +1,30 @@
 "use client";
 
-import { Button, Space, Table, Popconfirm, Card, App, Spin } from "antd";
-import { useEffect, useState, useMemo } from "react";
+import { App, Button, Card, Popconfirm, Space, Spin, Table } from "antd";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 
-import type { Person } from "@/types/person.types";
 import {
   deletePerson,
-  setSelectedRowKeys,
   setPagination,
+  setSelectedRowKeys,
 } from "@/store/personSlice";
 import { useAppSelector } from "@/store/store";
+import type { Person } from "@/types/person.types";
 
 interface PersonTableProps {
   onEdit: (person: Person) => void;
   externalLoading?: boolean;
   onAfterDelete?: () => Promise<void>;
+  recentlyUpdatedId?: string | null;
 }
 
 const PersonTable = ({
   onEdit,
   externalLoading = false,
   onAfterDelete,
+  recentlyUpdatedId,
 }: PersonTableProps) => {
   const { t } = useTranslation(["person-management", "common"]);
   const { message } = App.useApp();
@@ -43,7 +45,7 @@ const PersonTable = ({
   // Redux state
   const persons = useAppSelector((state) => state.persons.persons) as Person[];
   const selectedRowKeys = useAppSelector(
-    (state) => state.persons.selectedRowKeys,
+    (state) => state.persons.selectedRowKeys
   );
   const pagination = useAppSelector((state) => state.persons.pagination);
 
@@ -82,7 +84,7 @@ const PersonTable = ({
       dispatch(setSelectedRowKeys([]));
 
       message.success(
-        t("table.messages.deleteSelected", { count: deletedCount }),
+        t("table.messages.deleteSelected", { count: deletedCount })
       );
 
       // Trigger parent loading
@@ -96,7 +98,7 @@ const PersonTable = ({
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     dispatch(
-      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString())),
+      setSelectedRowKeys(newSelectedRowKeys.map((key) => key.toString()))
     );
   };
 
@@ -136,8 +138,8 @@ const PersonTable = ({
           {gender === "male"
             ? t("form.fields.gender.options.male")
             : gender === "female"
-              ? t("form.fields.gender.options.female")
-              : t("form.fields.gender.options.unsex")}
+            ? t("form.fields.gender.options.female")
+            : t("form.fields.gender.options.unsex")}
         </span>
       ),
     },
@@ -206,7 +208,7 @@ const PersonTable = ({
     // Default sort: newest first by ID (since ID is timestamp)
     if (!sortInfo.field || !sortInfo.order) {
       return sortedPersons.sort((a: Person, b: Person) =>
-        b.id.localeCompare(a.id),
+        b.id.localeCompare(a.id)
       );
     }
 
@@ -238,7 +240,7 @@ const PersonTable = ({
 
   const paginatedData = sortedData.slice(
     (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize,
+    pagination.current * pagination.pageSize
   );
 
   // Auto-navigate to correct page when data changes
@@ -253,7 +255,7 @@ const PersonTable = ({
           current: totalPages,
           pageSize: pagination.pageSize,
           total: sortedData.length,
-        }),
+        })
       );
     }
   }, [sortedData.length, pagination.current, pagination.pageSize, dispatch]);
@@ -279,6 +281,15 @@ const PersonTable = ({
 
   return (
     <Card>
+      <style>{`
+        .recently-updated-row {
+          background-color: #fff5f5 !important;
+          transition: background-color 0.3s ease;
+        }
+        .recently-updated-row:hover {
+          background-color: #fff5f5 !important;
+        }
+      `}</style>
       <div style={{ marginBottom: 16 }}>
         <Space>
           <Popconfirm
@@ -307,6 +318,9 @@ const PersonTable = ({
         columns={columns}
         rowKey="id"
         rowSelection={rowSelection}
+        rowClassName={(record) =>
+          record.id === recentlyUpdatedId ? "recently-updated-row" : ""
+        }
         onChange={(pagination, filters, sorter) => {
           const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
           setSortInfo({
