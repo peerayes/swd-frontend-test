@@ -1,5 +1,12 @@
 # SWD Frontend Test
 
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&style=flat-square)
+![React](https://img.shields.io/badge/React-18-blue?logo=react&style=flat-square)
+![Supabase](https://img.shields.io/badge/Supabase-Realtime-green?logo=supabase&style=flat-square)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?logo=tailwind-css&style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&style=flat-square)
+![Lucide](https://img.shields.io/badge/Lucide-Icons-orange?logo=lucide&style=flat-square)
+
 This project is a frontend assessment built with **Next.js**, **React**, and **TypeScript**. It demonstrates a Single Page Application (SPA) with advanced layout manipulation, state management, and internationalization.
 
 ## ✨ Features
